@@ -1,268 +1,56 @@
-"use client";
+import { Metadata } from "next";
+import HouseDetailClient from "@/components/HouseDetailClient";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import BookingForm from "@/components/BookingForm";
-import api from "@/services/api";
+// Next.js 15-də Params tipi Promise olmalıdır
+type Props = {
+    params: Promise<{ id: string }>;
+};
 
-// --- DTO TİPLƏRİ ---
-interface HouseAdvantageRel {
-    houseAdvantage: {
-        title: string;
-    };
-}
+// SEO üçün Metadata generasiyası
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    // API URL
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-interface HouseFile {
-    image: string;
-}
+    // ⚠️ DƏYİŞİKLİK: params-ı await edirik
+    const { id } = await params;
 
-interface Booking {
-    startDate: string;
-    endDate: string;
-    status: number;
-}
+    try {
+        // Server tərəfdə sadə fetch
+        const res = await fetch(`${API_URL}/Houses/${id}`);
+        const house = await res.json();
 
-interface HouseDetail {
-    id: string;
-    title: string;
-    description: string;
-    address: string;
-    city: string;
-    price: number;
-    numberOfRooms: number;
-    numberOfBeds: number;
-    field: number;
-    googleMapsCode: string;
-    coverImage: string;
-    images: HouseFile[];
-    houseHouseAdvantageRels: HouseAdvantageRel[];
-    bookings: Booking[];
-}
+        // Şəkil URL-ni düzəltmək
+        const ogImage = house.coverImage.startsWith("http")
+            ? house.coverImage
+            : `${API_URL?.replace("/api", "")}/api/files/${house.coverImage}`;
 
-export default function HouseDetailPage() {
-    const params = useParams();
-    const id = params.id as string; // URL-dən gələn ID
-
-    const [house, setHouse] = useState<HouseDetail | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    // Qalereya State-ləri
-    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-    // --- API-DƏN MƏLUMATI ÇƏK ---
-    useEffect(() => {
-        const fetchHouse = async () => {
-            try {
-                const response = await api.get(`/Houses/${id}`);
-                setHouse(response.data);
-            } catch (error) {
-                console.error("Ev tapılmadı:", error);
-            } finally {
-                setLoading(false);
-            }
+        return {
+            title: `${house.title} | Güvən Turizm`,
+            description: house.description?.substring(0, 150) + "...",
+            openGraph: {
+                title: house.title,
+                description: house.description?.substring(0, 150) + "...",
+                images: [
+                    {
+                        url: ogImage,
+                        width: 800,
+                        height: 600,
+                    },
+                ],
+            },
         };
+    } catch (error) {
+        return {
+            title: "Ev Detalları | Güvən Turizm",
+            description: "Qubada ən yaxşı günlük evlər.",
+        };
+    }
+}
 
-        if (id) fetchHouse();
-    }, [id]);
+// Əsas Səhifə Komponenti (Server Component)
+export default async function Page({ params }: Props) {
+    // ⚠️ DƏYİŞİKLİK: params-ı await edirik
+    const { id } = await params;
 
-    // --- HELPER: ŞƏKİL URL ---
-    const getImageUrl = (path: string) => {
-        if (!path) return "https://via.placeholder.com/800x600?text=No+Image";
-        if (path.startsWith("http")) return path;
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "";
-        return `${baseUrl}/api/files/${path}`;
-    };
-
-    // --- HELPER: QALEREYA ŞƏKİLLƏRİ ---
-    // CoverImage-i də qalereyaya əlavə edirik ki, hamısına baxmaq olsun
-    const galleryImages = house
-        ? [house.coverImage, ...house.images.map(img => img.image)]
-        : [];
-
-    // --- QALEREYA FUNKSİYALARI ---
-    const openGallery = (index: number) => {
-        setCurrentImageIndex(index);
-        setIsGalleryOpen(true);
-        document.body.style.overflow = 'hidden';
-    };
-
-    const closeGallery = () => {
-        setIsGalleryOpen(false);
-        document.body.style.overflow = 'unset';
-    };
-
-    const nextImage = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setCurrentImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1));
-    };
-
-    const prevImage = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setCurrentImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1));
-    };
-
-    if (loading) return <div className="py-40 text-center">Yüklənir...</div>;
-    if (!house) return <div className="py-40 text-center text-red-500">Ev tapılmadı.</div>;
-
-    return (
-        <div className="min-h-screen bg-white pb-20">
-            <div className="container mx-auto px-4 pt-6">
-
-                {/* --- BAŞLIQ --- */}
-                <div className="mb-6">
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
-                        {house.title}
-                    </h1>
-                    <p className="text-gray-500 underline flex items-center gap-1">
-                        <span>📍 {house.address || house.city}</span>
-                    </p>
-                </div>
-
-                {/* --- ŞƏKİL QALEREYASI (GRID) --- */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 h-[400px] md:h-[500px] rounded-3xl overflow-hidden mb-10">
-
-                    {/* Əsas Şəkil (Cover) */}
-                    <div
-                        onClick={() => openGallery(0)}
-                        className="md:col-span-2 h-full relative group cursor-pointer"
-                    >
-                        <img
-                            src={getImageUrl(house.coverImage)}
-                            alt="Main"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors flex items-center justify-center">
-                            <span className="opacity-0 group-hover:opacity-100 text-white bg-black/50 px-4 py-2 rounded-full text-sm transition-opacity">Böyüt</span>
-                        </div>
-                    </div>
-
-                    {/* Digər Şəkillər (İlk 4 dənəsi) */}
-                    <div className="md:col-span-2 grid grid-cols-2 gap-3 h-full">
-                        {/* Əgər qalereyada şəkil varsa göstər, yoxdursa cover-i təkrarla və ya boş qoy */}
-                        {house.images.slice(0, 4).map((imgObj, index) => (
-                            <div
-                                key={index}
-                                onClick={() => openGallery(index + 1)}
-                                className="relative group cursor-pointer overflow-hidden"
-                            >
-                                <img
-                                    src={getImageUrl(imgObj.image)}
-                                    alt={`Gallery ${index}`}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* --- ƏSAS MƏZMUN --- */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-
-                    {/* SOL TƏRƏF: Detallar */}
-                    <div className="lg:col-span-2 space-y-10">
-
-                        {/* İkonlar */}
-                        <div className="flex flex-wrap gap-6 pb-8 border-b border-gray-100">
-                            {/* Otaq */}
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 bg-orange-50 rounded-xl text-primary">🛏️</div>
-                                <div>
-                                    <p className="font-bold text-gray-900">{house.numberOfRooms} Otaq</p>
-                                    <p className="text-xs text-gray-500">Ümumi</p>
-                                </div>
-                            </div>
-                            {/* Yataq */}
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 bg-orange-50 rounded-xl text-primary">💤</div>
-                                <div>
-                                    <p className="font-bold text-gray-900">{house.numberOfBeds} Yataq</p>
-                                    <p className="text-xs text-gray-500">Rahat yuxu</p>
-                                </div>
-                            </div>
-                            {/* Sahə */}
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 bg-orange-50 rounded-xl text-primary">📏</div>
-                                <div>
-                                    <p className="font-bold text-gray-900">{house.field} m²</p>
-                                    <p className="text-xs text-gray-500">Sahə</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Təsvir */}
-                        <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Ev Haqqında</h2>
-                            <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-line">
-                                {house.description}
-                            </p>
-                        </div>
-
-                        {/* Üstünlüklər (Amenities) - API-dən gələn */}
-                        {house.houseHouseAdvantageRels && house.houseHouseAdvantageRels.length > 0 && (
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Nələr Təklif Edirik?</h2>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    {house.houseHouseAdvantageRels.map((rel, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 p-4 border border-gray-100 rounded-xl bg-gray-50/50">
-                                            <span className="text-primary text-xl">✓</span>
-                                            <span className="text-gray-700 font-medium">{rel.houseAdvantage.title}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Xəritə */}
-                        {house.googleMapsCode && (
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Ünvan</h2>
-                                <div
-                                    className="h-[400px] w-full rounded-3xl overflow-hidden shadow-lg border border-gray-200 [&_iframe]:w-full [&_iframe]:h-full"
-                                    dangerouslySetInnerHTML={{ __html: house.googleMapsCode }}
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* SAĞ TƏRƏF: Booking Form */}
-                    <div className="lg:col-span-1">
-                        <BookingForm
-                            houseId={house.id}
-                            price={house.price}
-                            existingBookings={house.bookings || []}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* --- FULL SCREEN MODAL (LIGHTBOX) --- */}
-            {isGalleryOpen && (
-                <div
-                    className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
-                    onClick={closeGallery}
-                >
-                    <button onClick={closeGallery} className="absolute top-6 right-6 text-white/70 hover:text-white p-2">✕</button>
-
-                    <button onClick={prevImage} className="absolute left-4 md:left-10 text-white/70 hover:text-white p-3 text-4xl">‹</button>
-
-                    <div className="relative max-w-5xl max-h-[85vh] w-full h-full flex items-center justify-center">
-                        <img
-                            src={getImageUrl(galleryImages[currentImageIndex])}
-                            alt="Full Screen"
-                            className="max-h-full max-w-full object-contain rounded-lg shadow-2xl"
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                        <div className="absolute -bottom-10 text-white text-lg font-medium">
-                            {currentImageIndex + 1} / {galleryImages.length}
-                        </div>
-                    </div>
-
-                    <button onClick={nextImage} className="absolute right-4 md:right-10 text-white/70 hover:text-white p-3 text-4xl">›</button>
-                </div>
-            )}
-
-        </div>
-    );
+    return <HouseDetailClient id={id} />;
 }

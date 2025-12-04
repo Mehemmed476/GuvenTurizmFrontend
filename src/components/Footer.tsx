@@ -1,103 +1,126 @@
+"use client";
+
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
+import { FaInstagram, FaFacebookF, FaWhatsapp, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa"; // <--- İKONLAR
 
 export default function Footer() {
+    const [settings, setSettings] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        api.get("/Common/settings")
+            .then(res => setSettings(res.data))
+            .catch(err => console.error(err));
+    }, []);
+
+    const currentYear = new Date().getFullYear();
+
     return (
-        <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
+        <footer className="bg-gray-900 text-white pt-16 pb-8 border-t border-gray-800">
             <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
 
-                {/* --- ÜST HİSSƏ (4 Sütunlu Grid) --- */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-
-                    {/* 1. Sütun: Loqo və Haqqında */}
+                    {/* Brend */}
                     <div>
-                        <Link href="/" className="text-2xl font-extrabold tracking-tight flex items-center gap-1 mb-4 text-white">
-                            <span className="text-primary">Güvən</span>
-                            <span>Turizm</span>
+                        <Link href="/" className="text-2xl font-extrabold flex items-center gap-2 mb-6">
+                            <span className="text-primary">Güvən</span> Turizm
                         </Link>
-                        <p className="text-sm leading-relaxed text-gray-400">
-                            Qubanın ən gözəl guşələrində, təbiət qoynunda unudulmaz istirahət üçün
-                            sizin etibarlı seçiminiz. Rahatlıq və keyfiyyət bizim işimizdir.
+                        <p className="text-gray-400 leading-relaxed mb-6 text-sm">
+                            Qubada ən rahat və sərfəli günlük evləri tapmaq üçün güvənli ünvanınız. İstirahətinizi bizimlə planlaşdırın.
                         </p>
+
+                        {/* SOSİAL MEDİA İKONLARI */}
+                        <div className="flex gap-3">
+                            {settings["Instagram"] && (
+                                <a
+                                    href={settings["Instagram"]}
+                                    target="_blank"
+                                    className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 hover:text-white transition-all duration-300 group"
+                                    title="Instagram"
+                                >
+                                    <FaInstagram className="text-xl text-gray-400 group-hover:text-white transition-colors" />
+                                </a>
+                            )}
+                            {settings["Facebook"] && (
+                                <a
+                                    href={settings["Facebook"]}
+                                    target="_blank"
+                                    className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-all duration-300 group"
+                                    title="Facebook"
+                                >
+                                    <FaFacebookF className="text-lg text-gray-400 group-hover:text-white transition-colors" />
+                                </a>
+                            )}
+                            {settings["Whatsapp"] && (
+                                <a
+                                    href={settings["Whatsapp"]}
+                                    target="_blank"
+                                    className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#25D366] hover:text-white transition-all duration-300 group"
+                                    title="WhatsApp"
+                                >
+                                    <FaWhatsapp className="text-xl text-gray-400 group-hover:text-white transition-colors" />
+                                </a>
+                            )}
+                        </div>
                     </div>
 
-                    {/* 2. Sütun: Sürətli Keçidlər */}
+                    {/* Linklər */}
                     <div>
-                        <h3 className="text-white font-bold text-lg mb-4">Sürətli Keçidlər</h3>
-                        <ul className="space-y-2">
-                            <li>
-                                <Link href="/" className="hover:text-primary transition-colors">Əsas Səhifə</Link>
-                            </li>
-                            <li>
-                                <Link href="/houses" className="hover:text-primary transition-colors">Evlərimiz</Link>
-                            </li>
-                            <li>
-                                <Link href="/about" className="hover:text-primary transition-colors">Haqqımızda</Link>
-                            </li>
-                            <li>
-                                <Link href="/contact" className="hover:text-primary transition-colors">Əlaqə</Link>
-                            </li>
+                        <h4 className="text-lg font-bold mb-6 border-l-4 border-primary pl-3">Sürətli Keçid</h4>
+                        <ul className="space-y-3 text-gray-400 text-sm">
+                            <li><Link href="/" className="hover:text-primary transition-colors hover:translate-x-1 inline-block">Ana Səhifə</Link></li>
+                            <li><Link href="/houses" className="hover:text-primary transition-colors hover:translate-x-1 inline-block">Evlər</Link></li>
+                            <li><Link href="/about" className="hover:text-primary transition-colors hover:translate-x-1 inline-block">Haqqımızda</Link></li>
+                            <li><Link href="/contact" className="hover:text-primary transition-colors hover:translate-x-1 inline-block">Əlaqə</Link></li>
                         </ul>
                     </div>
 
-                    {/* 3. Sütun: Əlaqə Məlumatları */}
+                    {/* Əlaqə */}
                     <div>
-                        <h3 className="text-white font-bold text-lg mb-4">Bizimlə Əlaqə</h3>
-                        <ul className="space-y-4">
+                        <h4 className="text-lg font-bold mb-6 border-l-4 border-primary pl-3">Bizimlə Əlaqə</h4>
+                        <ul className="space-y-4 text-gray-400 text-sm">
                             <li className="flex items-start gap-3">
-                                <svg className="w-5 h-5 text-primary mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                <span>H. Əliyev prospekti, Quba, Azərbaycan</span>
+                                <span className="text-primary mt-1"><FaMapMarkerAlt /></span>
+                                <span>{settings["Address"] || "Quba şəhəri, Azərbaycan"}</span>
                             </li>
                             <li className="flex items-center gap-3">
-                                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                                <span>+994 50 123 45 67</span>
+                                <span className="text-primary"><FaPhoneAlt /></span>
+                                <a href={`tel:${settings["PhoneNumber"]}`} className="hover:text-white transition-colors">
+                                    {settings["PhoneNumber"] || "+994 50 000 00 00"}
+                                </a>
                             </li>
                             <li className="flex items-center gap-3">
-                                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                <span>info@guventurizm.az</span>
+                                <span className="text-primary"><FaEnvelope /></span>
+                                <a href={`mailto:${settings["Email"]}`} className="hover:text-white transition-colors">
+                                    {settings["Email"] || "info@guventurizm.az"}
+                                </a>
                             </li>
                         </ul>
                     </div>
 
-                    {/* 4. Sütun: Sosial Media & Abunə */}
+                    {/* Məkan */}
                     <div>
-                        <h3 className="text-white font-bold text-lg mb-4">Yeniliklərdən Xəbərdar Ol</h3>
-                        <p className="text-sm mb-4 text-gray-400">Ən son evlər və endirimlər haqqında məlumat almaq üçün abunə olun.</p>
-
-                        <div className="flex gap-2">
-                            <input
-                                type="email"
-                                placeholder="Email ünvanınız"
-                                className="bg-gray-800 text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                            <button className="bg-primary hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
-                                Ok
-                            </button>
+                        <h4 className="text-lg font-bold mb-6 border-l-4 border-primary pl-3">Məkanımız</h4>
+                        <div className="h-40 rounded-xl overflow-hidden bg-gray-800 border border-gray-700 opacity-80 hover:opacity-100 transition-opacity">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48107.07062299723!2d48.4727400403767!3d41.36443697926639!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40f089930f353239%3A0x6a09075796c0d8b4!2sGuba!5e0!3m2!1sen!2saz!4v1700000000000!5m2!1sen!2saz"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                            ></iframe>
                         </div>
-
-                        {/* Sosial İkonlar */}
-                        <div className="flex gap-4 mt-6">
-                            {/* Instagram */}
-                            <a href="#" className="bg-gray-800 p-2 rounded-full hover:bg-primary hover:text-white transition-all">
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
-                            </a>
-                            {/* Facebook */}
-                            <a href="#" className="bg-gray-800 p-2 rounded-full hover:bg-primary hover:text-white transition-all">
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.791-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-
-                {/* --- ALT HİSSƏ (Copyright) --- */}
-                <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-                    <p>&copy; {new Date().getFullYear()} Güvən Turizm. Bütün hüquqlar qorunur.</p>
-                    <div className="flex gap-6 mt-4 md:mt-0">
-                        <a href="#" className="hover:text-white transition-colors">Məxfilik Siyasəti</a>
-                        <a href="#" className="hover:text-white transition-colors">İstifadə Şərtləri</a>
                     </div>
                 </div>
 
+                <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm gap-4">
+                    <p>{settings["Copyright"] || `© ${currentYear} Güvən Turizm. Bütün hüquqlar qorunur.`}</p>
+                    <p className="flex items-center gap-1">
+                        Made with <span className="text-red-500">♥</span> in Azerbaijan
+                    </p>
+                </div>
             </div>
         </footer>
     );

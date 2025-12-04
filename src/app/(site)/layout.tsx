@@ -1,12 +1,8 @@
+// src/app/(site)/layout.tsx
+
+// BURADA globals.css IMPORTU OLMAMALIDIR! 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import type { Metadata } from "next";
-
-// Sayt hissəsi üçün xüsusi başlıq (Title)
-export const metadata: Metadata = {
-  title: "Güvən Turizm - Qubada Günlük Evlər",
-  description: "Qubada ən sərfəli günlük kirayə evlər və villalar.",
-};
 
 export default function SiteLayout({
   children,
@@ -16,11 +12,9 @@ export default function SiteLayout({
   return (
     <>
       <Navbar />
-
-      <main>
+      <main className="min-h-screen">
         {children}
       </main>
-
       <Footer />
     </>
   );

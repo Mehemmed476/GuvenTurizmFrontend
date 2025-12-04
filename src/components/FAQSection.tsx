@@ -1,102 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
 
-// Gələcəkdə Backend-dən gələcək Model (Entity)
-interface FAQItem {
-    id: number;
+interface FAQ {
+    id: string;
     question: string;
     answer: string;
 }
 
-// Admin paneldən dəyişdiriləcək datalar (Simulyasiya)
-const faqData: FAQItem[] = [
-    {
-        id: 1,
-        question: "Evləri necə rezervasiya edə bilərəm?",
-        answer: "Bəyəndiyiniz evi seçdikdən sonra 'Rezervasiya et' düyməsinə basaraq, tarix və qonaq sayını qeyd edib ödəniş edə bilərsiniz. Təsdiq mesajı dərhal emailinizə göndəriləcək."
-    },
-    {
-        id: 2,
-        question: "Giriş və çıxış saatları neçədədir?",
-        answer: "Standart giriş vaxtı (Check-in) 14:00, çıxış vaxtı (Check-out) isə 12:00-dır. Erkən giriş və ya gec çıxış üçün əvvəlcədən ev sahibi ilə əlaqə saxlamağınız xahiş olunur."
-    },
-    {
-        id: 3,
-        question: "Ödənişi geri qaytarmaq mümkündür?",
-        answer: "Giriş tarixindən 48 saat əvvələ qədər edilən ləğvlərdə ödəniş tam geri qaytarılır. 48 saatdan az qaldıqda isə yalnız 50% geri ödənilir."
-    },
-    {
-        id: 4,
-        question: "Evlərdə internet (Wi-Fi) varmı?",
-        answer: "Bəli, Qubadakı bütün evlərimizdə yüksək sürətli fiber-optik internet mövcuddur."
-    },
-    {
-        id: 5,
-        question: "Ev heyvanları ilə gəlmək olar?",
-        answer: "Bəzi evlərimiz ev heyvanı dostudur, bəziləri isə yox. Zəhmət olmasa evin detallarına baxarkən 'Ev heyvanlarına icazə verilir' işarəsinə diqqət yetirin."
-    }
-];
-
 export default function FAQSection() {
-    // Hansı sualın açıq olduğunu tutan state (null = hamısı bağlı)
-    const [openId, setOpenId] = useState<number | null>(null);
+    const [faqs, setFaqs] = useState<FAQ[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-    const toggleFAQ = (id: number) => {
-        // Əgər basılan sual artıq açıqdırsa bağla, deyilsə onu aç
-        setOpenId(openId === id ? null : id);
+    useEffect(() => {
+        api.get("/Common/faqs")
+            .then(res => setFaqs(res.data))
+            .catch(err => console.error(err))
+            .finally(() => setLoading(false));
+    }, []);
+
+    const toggleFAQ = (index: number) => {
+        setOpenIndex(openIndex === index ? null : index);
     };
 
-    return (
-        <section className="py-20 bg-white">
-            <div className="container mx-auto px-4 max-w-4xl">
+    if (loading) return <div className="py-20 text-center text-gray-500">Suallar yüklənir...</div>;
+    if (faqs.length === 0) return null;
 
-                {/* Başlıq */}
+    return (
+        <section className="py-20 bg-gray-50">
+            <div className="container mx-auto px-4 max-w-4xl">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
                         Tez-tez Verilən <span className="text-primary">Suallar</span>
                     </h2>
-                    <p className="text-gray-500">
-                        Ağlınızdakı suallara ən qısa zamanda cavab tapın.
-                    </p>
+                    <p className="text-gray-500">Sizi maraqlandıran sualların cavablarını burada tapa bilərsiniz.</p>
                 </div>
 
-                {/* Accordion List */}
                 <div className="space-y-4">
-                    {faqData.map((item) => (
+                    {faqs.map((faq, index) => (
                         <div
-                            key={item.id}
-                            className={`border border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 ${openId === item.id ? 'shadow-md border-primary/30 bg-orange-50/30' : 'hover:border-gray-300'}`}
+                            key={faq.id}
+                            className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${openIndex === index ? "border-primary shadow-lg shadow-orange-100" : "border-gray-100 hover:border-gray-200"
+                                }`}
                         >
-                            {/* Sual Hissəsi (Kliklənə bilən) */}
                             <button
-                                onClick={() => toggleFAQ(item.id)}
-                                className="w-full flex justify-between items-center p-5 text-left focus:outline-none"
+                                onClick={() => toggleFAQ(index)}
+                                className="w-full flex justify-between items-center p-6 text-left focus:outline-none"
                             >
-                                <span className={`text-lg font-bold transition-colors ${openId === item.id ? 'text-primary' : 'text-gray-800'}`}>
-                                    {item.question}
+                                <span className={`font-bold text-lg ${openIndex === index ? "text-primary" : "text-gray-800"}`}>
+                                    {faq.question}
                                 </span>
-
-                                {/* Ox İşarəsi (Fırlanan) */}
-                                <span className={`ml-4 flex-shrink-0 transition-transform duration-300 ${openId === item.id ? 'rotate-180 text-primary' : 'text-gray-400'}`}>
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <span className={`transform transition-transform duration-300 text-2xl ${openIndex === index ? "rotate-180 text-primary" : "text-gray-400"}`}>
+                                    {openIndex === index ? "−" : "+"}
                                 </span>
                             </button>
 
-                            {/* Cavab Hissəsi (Açılıb/Bağlanan) */}
                             <div
-                                className={`px-5 overflow-hidden transition-all duration-300 ease-in-out ${openId === item.id ? 'max-h-40 pb-5 opacity-100' : 'max-h-0 opacity-0'}`}
+                                className={`transition-all duration-300 ease-in-out ${openIndex === index ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                                    }`}
                             >
-                                <p className="text-gray-600 leading-relaxed">
-                                    {item.answer}
-                                </p>
+                                <div className="p-6 pt-0 text-gray-600 leading-relaxed border-t border-dashed border-gray-100 mt-2">
+                                    {faq.answer}
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
-
             </div>
         </section>
     );

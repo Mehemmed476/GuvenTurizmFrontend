@@ -2,22 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react"; // useEffect və jwtDecode sildik
 import AuthModal from "./AuthModal";
-import { jwtDecode } from "jwt-decode";
-import toast from "react-hot-toast"; // Toast importu
-
-interface DecodedToken {
-    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string | string[];
-    role?: string | string[];
-    sub?: string;
-    exp?: number;
-}
+import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext"; // <--- IMPORT ET
 
 export default function Navbar() {
+    const { user, logout } = useAuth(); // <--- Context-dən məlumatları alırıq
     const [isOpen, setIsOpen] = useState(false);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
-    const [userRole, setUserRole] = useState<string | null>(null);
 
     const pathname = usePathname();
 
@@ -26,23 +19,8 @@ export default function Navbar() {
             ? "text-primary font-bold"
             : "text-gray-600 hover:text-primary font-medium";
 
-    // Tokeni oxuyub rolu təyin edirik
-    useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        if (token) {
-            try {
-                const decoded: DecodedToken = jwtDecode(token);
-                const roleClaim = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || decoded.role;
-                const role = Array.isArray(roleClaim) ? roleClaim[0] : roleClaim;
-                setUserRole(role || null);
-            } catch (error) {
-                localStorage.removeItem("accessToken");
-            }
-        }
-    }, []);
-
-    // Xüsusi Dizaynlı Çıxış Funksiyası (Toast ilə)
-    const handleLogout = () => {
+    // --- LOGOUT (Artıq Context-dən gəlir) ---
+    const handleLogoutClick = () => {
         toast((t) => (
             <div className="flex flex-col gap-4 min-w-[200px]">
                 <span className="font-bold text-gray-800 text-center">
@@ -58,8 +36,7 @@ export default function Navbar() {
                     <button
                         onClick={() => {
                             toast.dismiss(t.id);
-                            localStorage.removeItem("accessToken");
-                            window.location.href = "/";
+                            logout(); // <--- Context funksiyası
                         }}
                         className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-colors"
                     >
@@ -102,11 +79,11 @@ export default function Navbar() {
                         {/* --- SAĞ TƏRƏF --- */}
                         <div className="hidden md:flex items-center space-x-4">
 
-                            {userRole ? (
+                            {user ? ( // user obyekti varsa deməli giriş edilib
                                 <div className="flex items-center gap-3">
 
                                     {/* ADMIN / PROFILE DÜYMƏSİ */}
-                                    {userRole === "Admin" ? (
+                                    {user.role === "Admin" ? (
                                         <Link
                                             href="/admin"
                                             className="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:bg-gray-800 transition-all flex items-center gap-2"
@@ -124,7 +101,7 @@ export default function Navbar() {
 
                                     {/* KREATIV ÇIXIŞ İKONU */}
                                     <button
-                                        onClick={handleLogout}
+                                        onClick={handleLogoutClick}
                                         className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 group"
                                         title="Çıxış et"
                                     >
@@ -182,14 +159,14 @@ export default function Navbar() {
                                 <hr className="border-gray-100 my-2" />
 
                                 <div className="flex flex-col gap-3 px-2">
-                                    {userRole ? (
+                                    {user ? (
                                         <>
-                                            {userRole === "Admin" ? (
+                                            {user.role === "Admin" ? (
                                                 <Link href="/admin" onClick={() => setIsOpen(false)} className="bg-gray-900 text-white w-full text-center py-3 rounded-xl font-bold">Admin Panel</Link>
                                             ) : (
                                                 <Link href="/profile" onClick={() => setIsOpen(false)} className="bg-primary text-white w-full text-center py-3 rounded-xl font-bold">Profilim</Link>
                                             )}
-                                            <button onClick={handleLogout} className="w-full text-center py-2 text-red-500 font-bold hover:bg-red-50 rounded-xl flex items-center justify-center gap-2">
+                                            <button onClick={handleLogoutClick} className="w-full text-center py-2 text-red-500 font-bold hover:bg-red-50 rounded-xl flex items-center justify-center gap-2">
                                                 Çıxış
                                             </button>
                                         </>

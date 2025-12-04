@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import api from "@/services/api";
 import PropertyCard from "./PropertyCard";
+import PropertyCardSkeleton from "./PropertyCardSkeleton"; // <--- Yeni Import
 
 // Backend-dən gələn DTO
 interface House {
-    id: number; // və ya string (Backend GUID göndərir, amma PropertyCard uyğunlaşmalıdır)
+    id: number;
     title: string;
     address: string;
     price: number;
@@ -21,7 +22,7 @@ export default function FeaturedProperties() {
     const [houses, setHouses] = useState<House[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Şəkil URL-ni düzəltmək üçün (Backend fayl adını verir, biz tam yol düzəldirik)
+    // Şəkil URL-ni düzəltmək üçün
     const getImageUrl = (path: string) => {
         if (!path) return "https://via.placeholder.com/400x300?text=No+Image";
         if (path.startsWith("http")) return path;
@@ -32,10 +33,11 @@ export default function FeaturedProperties() {
     useEffect(() => {
         const fetchHouses = async () => {
             try {
-                // Backend: [HttpGet("active")] (Hər kəs görə bilər)
+                // Test üçün süni gecikmə (İstəsən silə bilərsən)
+                // await new Promise(resolve => setTimeout(resolve, 2000));
+
                 const response = await api.get("/Houses/active");
-                // Sadəcə ilk 3 evi götürək (Və ya ən son əlavə olunanları)
-                // Reverse edib son əlavə olunanları başa gətirə bilərik
+                // Ən son 3 evi götürürük
                 const latestHouses = response.data.reverse().slice(0, 3);
                 setHouses(latestHouses);
             } catch (error) {
@@ -48,17 +50,29 @@ export default function FeaturedProperties() {
         fetchHouses();
     }, []);
 
+    // --- LOADING SKELETON ---
     if (loading) {
         return (
-            <div className="py-20 text-center">
-                <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-2 text-gray-500">Evlər yüklənir...</p>
-            </div>
+            <section className="py-20 bg-white">
+                <div className="container mx-auto px-4">
+                    <div className="text-center mb-12">
+                        {/* Başlıq Skeleti */}
+                        <div className="h-10 w-64 bg-gray-100 rounded-lg mx-auto animate-pulse mb-4"></div>
+                        <div className="h-4 w-96 bg-gray-50 rounded-lg mx-auto animate-pulse"></div>
+                    </div>
+                    {/* Kart Skeletləri (3 ədəd) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3].map((i) => (
+                            <PropertyCardSkeleton key={i} />
+                        ))}
+                    </div>
+                </div>
+            </section>
         );
     }
 
     if (houses.length === 0) {
-        return null; // Ev yoxdursa bu bölməni göstərmə
+        return null;
     }
 
     return (
@@ -82,7 +96,7 @@ export default function FeaturedProperties() {
                             key={house.id}
                             id={house.id}
                             title={house.title}
-                            address={house.address} // Və ya house.city
+                            address={house.address}
                             price={house.price}
                             roomCount={house.numberOfRooms}
                             bedCount={house.numberOfBeds}

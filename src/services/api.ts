@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie"; // <--- Yeni import
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -9,18 +10,14 @@ const api = axios.create({
   },
 });
 
-// --- REQUEST INTERCEPTOR (Sorğu Çıxmamışdan Əvvəl) ---
+// --- REQUEST INTERCEPTOR ---
 api.interceptors.request.use(
   (config) => {
-    // 1. Brauzerin yaddaşından (Local Storage) tokeni axtarırıq
-    // "accessToken" adını biz qoyuruq, Login olanda bu adla yadda saxlayacağıq.
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("accessToken");
+    // DƏYİŞİKLİK: Tokeni cookie-dən oxuyuruq
+    const token = Cookies.get("accessToken");
 
-      // 2. Əgər token varsa, Header-ə "Bearer eyJ..." kimi əlavə et
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -29,17 +26,15 @@ api.interceptors.request.use(
   }
 );
 
-// --- RESPONSE INTERCEPTOR (Cavab Gələndə) ---
-// Bunu da əlavə edirəm ki, əgər Tokenin vaxtı bitibsə (401 xətası),
-// istifadəçini avtomatik Login səhifəsinə atsın.
+// --- RESPONSE INTERCEPTOR ---
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token keçərsizdir və ya yoxdur
-      // İstersen burada localStorage.removeItem("accessToken") edə bilərsən
-      // window.location.href = "/login"; // (Əgər login səhifən varsa)
-      console.error("İcazə yoxdur! Zəhmət olmasa giriş edin.");
+      // Token keçərsizdirsə, cookie-ni silirik
+      Cookies.remove("accessToken");
+      console.error("Sessiya bitdi. Zəhmət olmasa yenidən giriş edin.");
+      // İstəsəniz bura window.location.href = "/" əlavə edə bilərsiniz
     }
     return Promise.reject(error);
   }

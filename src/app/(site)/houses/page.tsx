@@ -3,9 +3,10 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
+import PropertyCardSkeleton from "@/components/PropertyCardSkeleton";
 import api from "@/services/api";
 
-// --- TİPLƏR (Backend DTO-larına uyğun) ---
+// --- YERLİ TİPLƏR (Heç yerə daşımırıq) ---
 interface Category {
     id: string;
     title: string;
@@ -14,11 +15,11 @@ interface Category {
 interface Booking {
     startDate: string;
     endDate: string;
-    status: number; // 0: Pending, 1: Confirmed, 2: Canceled
+    status: number;
 }
 
 interface House {
-    id: string; // Backend GUID göndərir
+    id: string;
     title: string;
     address: string;
     price: number;
@@ -31,90 +32,100 @@ interface House {
     isDeleted: boolean;
 }
 
-// --- MƏZMUN KOMPONENTİ ---
 function HousesContent() {
     const searchParams = useSearchParams();
 
-    // 1. URL-dən gələn parametrləri oxuyuruq
+    // URL parametrləri
     const urlStartDate = searchParams.get("startDate");
     const urlEndDate = searchParams.get("endDate");
     const urlMinRooms = searchParams.get("minRooms");
 
-    // 2. State-lər
+    // DATA STATE-ləri
     const [houses, setHouses] = useState<House[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    // Filtr State-ləri (URL-dən gələn və ya default)
+    // PAGINATION STATE-ləri
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true); // Daha çox ev varmı?
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false); // "Daha çox" düyməsi üçün
+
+    // FILTER STATE-ləri
     const [selectedCategory, setSelectedCategory] = useState("Hamısı");
     const [maxPrice, setMaxPrice] = useState(1000);
     const [minRooms, setMinRooms] = useState(urlMinRooms ? parseInt(urlMinRooms) : 1);
 
-    // 3. API-dən dataları çək
+    // İlk Yüklənmə (Kateqoriyalar və İlk Səhifə)
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchInitialData = async () => {
             try {
-                setLoading(true);
-                const [housesRes, catsRes] = await Promise.all([
-                    api.get("/Houses/active"),      // Bütün aktiv evləri çək
-                    api.get("/Categories/active")   // Bütün aktiv kateqoriyaları çək
+                // Səhifə 1-i və kateqoriyaları yükləyirik
+                const [catsRes, housesRes] = await Promise.all([
+                    api.get("/Categories/active"),
+                    api.get(`/Houses/active?page=1&size=9`)
                 ]);
-                setHouses(housesRes.data);
+
                 setCategories(catsRes.data);
+                setHouses(housesRes.data);
+
+                // Əgər gələn data 9-dan azdırsa, deməli son səhifədir
+                if (housesRes.data.length < 9) setHasMore(false);
+
             } catch (error) {
                 console.error("Data xətası:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchData();
+        fetchInitialData();
     }, []);
 
-    // 4. ƏSAS FİLTRLƏMƏ MƏNTİQİ
+    // "Daha Çox Yüklə" Funksiyası
+    const loadMore = async () => {
+        if (loadingMore || !hasMore) return;
+        setLoadingMore(true);
+
+        try {
+            const nextPage = page + 1;
+            const response = await api.get(`/Houses/active?page=${nextPage}&size=9`);
+
+            if (response.data.length === 0) {
+                setHasMore(false);
+            } else {
+                // Yeni evləri köhnələrin sonuna əlavə et
+                setHouses(prev => [...prev, ...response.data]);
+                setPage(nextPage);
+                if (response.data.length < 9) setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Yükləmə xətası:", error);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+    // Filtrləmə Məntiqi
     const filteredHouses = houses.filter((house) => {
+        if (selectedCategory !== "Hamısı" && house.category?.title !== selectedCategory) return false;
+        if (house.price > maxPrice) return false;
+        if (house.numberOfRooms < minRooms) return false;
 
-        // A. Kateqoriya Filtri
-        if (selectedCategory !== "Hamısı" && house.category?.title !== selectedCategory) {
-            return false;
-        }
-
-        // B. Qiymət Filtri
-        if (house.price > maxPrice) {
-            return false;
-        }
-
-        // C. Otaq Sayı Filtri
-        if (house.numberOfRooms < minRooms) {
-            return false;
-        }
-
-        // D. TARİX FİLTRİ (Ən vacib hissə)
-        // Əgər istifadəçi tarix seçibsə, dolu olan evləri gizlət
         if (urlStartDate && urlEndDate) {
             const start = new Date(urlStartDate);
             const end = new Date(urlEndDate);
-
-            // Evin rezervasiyalarına baxırıq
             if (house.bookings && house.bookings.length > 0) {
                 const isOccupied = house.bookings.some((booking) => {
-                    // Ləğv edilmiş (Canceled) rezervasiyaları saymırıq (Status=2)
                     if (booking.status === 2) return false;
-
                     const bookingStart = new Date(booking.startDate);
                     const bookingEnd = new Date(booking.endDate);
-
-                    // Tarix kəsişməsi (Overlap) məntiqi
                     return start < bookingEnd && end > bookingStart;
                 });
-
-                if (isOccupied) return false; // Ev doludursa, siyahıdan çıxar
+                if (isOccupied) return false;
             }
         }
-
-        return true; // Bütün şərtləri keçdisə, evi göstər
+        return true;
     });
 
-    // Şəkil URL-ni düzəltmək
     const getImageUrl = (path: string) => {
         if (!path) return "https://via.placeholder.com/400x300?text=No+Image";
         if (path.startsWith("http")) return path;
@@ -124,13 +135,12 @@ function HousesContent() {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
-
             {/* BAŞLIQ */}
             <div className="bg-gray-900 py-12 mb-10 relative">
                 <div className="container mx-auto px-4 relative z-10 text-center">
                     <h1 className="text-4xl font-extrabold text-white mb-2">Bütün Evlərimiz</h1>
                     <p className="text-gray-300">
-                        {urlStartDate ? "Seçdiyiniz tarixlərə uyğun evlər" : "Qubada istəyinizə uyğun ən yaxşı evləri seçin"}
+                        Qubada ən yaxşı günlük evləri seçin
                     </p>
                 </div>
             </div>
@@ -141,120 +151,102 @@ function HousesContent() {
                     {/* --- SOL TƏRƏF: FİLTRLƏR --- */}
                     <aside className="w-full lg:w-1/4">
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
-                            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                Filtrlər
-                            </h3>
+                            <h3 className="text-xl font-bold text-gray-800 mb-6">Filtrlər</h3>
 
                             {/* Kateqoriya */}
-                            <div className="mb-8">
+                            <div className="mb-6">
                                 <h4 className="font-semibold text-gray-700 mb-3">Ev Tipi</h4>
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-3 cursor-pointer group">
-                                        <input
-                                            type="radio"
-                                            name="category"
-                                            value="Hamısı"
-                                            checked={selectedCategory === "Hamısı"}
-                                            onChange={(e) => setSelectedCategory(e.target.value)}
-                                            className="w-5 h-5 text-primary border-gray-300 focus:ring-primary"
-                                        />
+                                        <input type="radio" name="category" value="Hamısı" checked={selectedCategory === "Hamısı"} onChange={(e) => setSelectedCategory(e.target.value)} className="w-5 h-5 text-primary border-gray-300 focus:ring-primary" />
                                         <span className="text-gray-600 group-hover:text-primary transition-colors">Hamısı</span>
                                     </label>
-
                                     {categories.map((cat) => (
                                         <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
-                                            <input
-                                                type="radio"
-                                                name="category"
-                                                value={cat.title}
-                                                checked={selectedCategory === cat.title}
-                                                onChange={(e) => setSelectedCategory(e.target.value)}
-                                                className="w-5 h-5 text-primary border-gray-300 focus:ring-primary"
-                                            />
+                                            <input type="radio" name="category" value={cat.title} checked={selectedCategory === cat.title} onChange={(e) => setSelectedCategory(e.target.value)} className="w-5 h-5 text-primary border-gray-300 focus:ring-primary" />
                                             <span className="text-gray-600 group-hover:text-primary transition-colors">{cat.title}</span>
                                         </label>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Otaq Sayı */}
+                            {/* Digər filtrlər... */}
                             <div className="mb-6">
                                 <div className="flex justify-between mb-2">
-                                    <h4 className="font-semibold text-gray-700">Minimum Otaq</h4>
+                                    <h4 className="font-semibold text-gray-700">Min. Otaq</h4>
                                     <span className="font-bold text-primary">{minRooms}</span>
                                 </div>
-                                <input
-                                    type="range"
-                                    min="1"
-                                    max="10"
-                                    step="1"
-                                    value={minRooms}
-                                    onChange={(e) => setMinRooms(Number(e.target.value))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                                />
+                                <input type="range" min="1" max="10" step="1" value={minRooms} onChange={(e) => setMinRooms(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" />
                             </div>
 
-                            {/* Qiymət */}
                             <div className="mb-6">
                                 <div className="flex justify-between mb-2">
-                                    <h4 className="font-semibold text-gray-700">Maksimum Qiymət</h4>
+                                    <h4 className="font-semibold text-gray-700">Maks. Qiymət</h4>
                                     <span className="font-bold text-primary">{maxPrice} ₼</span>
                                 </div>
-                                <input
-                                    type="range"
-                                    min="50"
-                                    max="2000"
-                                    step="50"
-                                    value={maxPrice}
-                                    onChange={(e) => setMaxPrice(Number(e.target.value))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                                />
+                                <input type="range" min="50" max="2000" step="50" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" />
                             </div>
 
-                            {/* Təmizlə Butonu */}
-                            <button
-                                onClick={() => { setSelectedCategory("Hamısı"); setMaxPrice(2000); setMinRooms(1); }}
-                                className="w-full py-2 text-sm text-gray-500 hover:text-red-500 font-medium transition-colors flex items-center justify-center gap-2"
-                            >
-                                Filtrləri Təmizlə
-                            </button>
+                            <button onClick={() => { setSelectedCategory("Hamısı"); setMaxPrice(2000); setMinRooms(1); }} className="w-full py-2 text-sm text-gray-500 hover:text-red-500 font-medium transition-colors border border-gray-200 rounded-lg">Filtrləri Təmizlə</button>
                         </div>
                     </aside>
 
-                    {/* --- SAĞ TƏRƏF: EVLƏR (GRID) --- */}
+                    {/* --- SAĞ TƏRƏF: EVLƏR --- */}
                     <div className="w-full lg:w-3/4">
-
-                        <div className="mb-6 flex justify-between items-center">
+                        <div className="mb-6">
                             <p className="text-gray-500">
-                                <span className="font-bold text-gray-900">{filteredHouses.length}</span> ev tapıldı
+                                <span className="font-bold text-gray-900">{filteredHouses.length}</span> ev göstərilir
                             </p>
                         </div>
 
                         {loading ? (
-                            <div className="text-center py-20">Yüklənir...</div>
-                        ) : filteredHouses.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {filteredHouses.map((house) => (
-                                    <PropertyCard
-                                        key={house.id}
-                                        id={house.id}
-                                        title={house.title}
-                                        address={house.address} // və ya house.city
-                                        price={house.price}
-                                        roomCount={house.numberOfRooms}
-                                        bedCount={house.numberOfBeds}
-                                        imageUrl={getImageUrl(house.coverImage)}
-                                    />
-                                ))}
+                                {[1, 2, 3, 4].map((i) => <PropertyCardSkeleton key={i} />)}
                             </div>
+                        ) : filteredHouses.length > 0 ? (
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {filteredHouses.map((house) => (
+                                        <PropertyCard
+                                            key={house.id}
+                                            id={house.id}
+                                            title={house.title}
+                                            address={house.address}
+                                            price={house.price}
+                                            roomCount={house.numberOfRooms}
+                                            bedCount={house.numberOfBeds}
+                                            imageUrl={getImageUrl(house.coverImage)}
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* DAHA ÇOX YÜKLƏ DÜYMƏSİ */}
+                                {hasMore && (
+                                    <div className="mt-10 text-center">
+                                        <button
+                                            onClick={loadMore}
+                                            disabled={loadingMore}
+                                            className="px-8 py-3 bg-white border-2 border-gray-900 text-gray-900 font-bold rounded-full hover:bg-gray-900 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
+                                        >
+                                            {loadingMore ? (
+                                                <>
+                                                    <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                                                    Yüklənir...
+                                                </>
+                                            ) : (
+                                                "Daha Çox Göstər"
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
                                 <div className="text-6xl mb-4">🏠❌</div>
-                                <h3 className="text-xl font-bold text-gray-800">Təəssüf ki, ev tapılmadı.</h3>
-                                <p className="text-gray-500 mt-2">Zəhmət olmasa filtrləri dəyişdirib yenidən yoxlayın.</p>
+                                <h3 className="text-xl font-bold text-gray-800">Ev Tapılmadı</h3>
+                                <p className="text-gray-500 mt-2">Filtrləri dəyişərək yenidən yoxlayın.</p>
                             </div>
                         )}
-
                     </div>
 
                 </div>
@@ -263,7 +255,6 @@ function HousesContent() {
     );
 }
 
-// Next.js-də useSearchParams istifadə edəndə Suspense lazımdır
 export default function HousesPage() {
     return (
         <Suspense fallback={<div>Yüklənir...</div>}>
