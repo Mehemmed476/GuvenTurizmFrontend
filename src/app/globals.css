@@ -1,26 +1,116 @@
+@import "react-datepicker/dist/react-datepicker.css";
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Kendi renklerimizi burada tanımlıyoruz */
+  --color-primary: #FF5E14;
+  /* Senin ana Turuncu rengin */
+  --color-secondary: #FFFFFF;
+  /* Beyaz */
+  --color-background: #F3F4F6;
+  /* Arka plan grisi */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Sayfa geneli için temel ayarlar */
+body {
+  background-color: var(--color-background);
+  color: #333333;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* globals.css dosyasının en alt satırına ekle */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* globals.css en altına ekle */
+
+/* Seksi Buton Stili */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #FF2E00 100%);
+  /* Turuncudan kırmızıya geçiş */
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 94, 20, 0.4);
+  /* Turuncu parıltı/gölge */
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  /* Üzerine gelince hafif yukarı kalkar */
+  box-shadow: 0 6px 20px rgba(255, 94, 20, 0.6);
+  /* Gölge büyür */
+  filter: brightness(1.1);
+}
+
+/* --- react-datepicker YENİ STİL (Transparent & Elegant) --- */
+.react-datepicker-wrapper {
+  width: 100%;
+  /* Inputun tam genişlikdə olmasını təmin edir */
+}
+
+.react-datepicker {
+  font-family: inherit !important;
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+  padding: 10px !important;
+}
+
+.react-datepicker__header {
+  background-color: white !important;
+  border-bottom: none !important;
+}
+
+/* Seçilən gün (Transparent Narıncı) */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__day--in-range,
+.react-datepicker__day--in-selecting-range {
+  background-color: rgba(255, 94, 20, 0.15) !important;
+  /* %15 Transparent */
+  color: var(--color-primary) !important;
+  /* Yazı rəngi Narıncı */
+  font-weight: 900 !important;
+  border-radius: 0.5rem !important;
+  border: 1px solid var(--color-primary) !important;
+  /* İncə çərçivə */
+}
+
+/* Hover effekti */
+.react-datepicker__day:hover {
+  background-color: #f3f4f6 !important;
+  color: #333 !important;
+}
+
+/* Gün adları və Başlıq */
+.react-datepicker__current-month {
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.react-datepicker__day-name {
+  color: #aaa;
+  margin: 5px;
+}
+
+.react-datepicker__day {
+  margin: 5px;
+  /* Rəqəmlər arası boşluq */
+}
+
+.react-datepicker__triangle {
+  display: none !important;
 }
