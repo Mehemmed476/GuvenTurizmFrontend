@@ -59,13 +59,9 @@ export default function AdminHousesPage() {
     // Şəkil URL-ni düzəltmək üçün köməkçi funksiya
     // Backend-də "files/..." kimi gələn yolu tam URL-ə çeviririk
     const getImageUrl = (path: string) => {
-        if (!path) return "https://via.placeholder.com/100"; // Şəkil yoxdursa
-        if (path.startsWith("http")) return path; // Artıq tam URL-dirsə
-
-        // API URL-in sonundakı "/api" hissəsini çıxarıb fayl yolunu əlavə edirik
-        // Məsələn: https://localhost:7153/api/files/houses/covers/sekil.jpg
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "";
-        return `${baseUrl}/api/files/${path}`;
+        if (!path) return "https://via.placeholder.com/100";
+        if (path.startsWith("http")) return path;
+        return `https://api.guventurizm.az/api/files/${path}`;
     };
 
     if (isLoading) return <div className="p-10 text-center">Yüklənir...</div>;
