@@ -1,0 +1,33 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: 22
+        script: |
+          # 1. Frontend qovluğuna keç
+          cd /var/www/guventurizm-client
+
+          # 2. Ən son kodu çək
+          git pull origin main
+
+          # 3. Yeni paketləri yüklə
+          npm install
+
+          # 4. Proqramı yenidən 'build' et
+          npm run build
+
+          # 5. PM2 prosesini yenidən başlat
+          pm2 restart guventurizm-client
