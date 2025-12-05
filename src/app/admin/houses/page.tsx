@@ -24,7 +24,6 @@ export default function AdminHousesPage() {
     // --- API-dən Evləri Çəkmək ---
     const fetchHouses = async () => {
         try {
-            // Backend: [HttpGet] api/Houses (RequireAdmin)
             const response = await api.get("/Houses");
             setHouses(response.data);
         } catch (error) {
@@ -44,11 +43,7 @@ export default function AdminHousesPage() {
         if (!confirm("Bu evi silmək istədiyinizə əminsiniz?")) return;
 
         try {
-            // Backend: [HttpDelete] api/Houses/{id} -> DeleteHouseAsync (Hard Delete)
-            // Və ya [HttpPatch] api/Houses/{id}/soft-delete -> SoftDetectedHouseAsync
-            // Biz hələlik tam silmə (Delete) istifadə edək:
             await api.delete(`/Houses/${id}`);
-
             // Siyahını yenilə
             fetchHouses();
         } catch (error: any) {
@@ -56,11 +51,14 @@ export default function AdminHousesPage() {
         }
     };
 
-    // Şəkil URL-ni düzəltmək üçün köməkçi funksiya
-    // Backend-də "files/..." kimi gələn yolu tam URL-ə çeviririk
+    // --- Şəkil URL Helper ---
+    // DİQQƏT: Buraya "https://api.guventurizm.az" birbaşa yazdıq ki,
+    // "Mixed Content" xətası olmasın.
     const getImageUrl = (path: string) => {
         if (!path) return "https://via.placeholder.com/100";
         if (path.startsWith("http")) return path;
+
+        // Məcburi HTTPS ünvanı
         return `https://api.guventurizm.az/api/files/${path}`;
     };
 
