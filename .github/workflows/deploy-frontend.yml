@@ -30,4 +30,4 @@ jobs:
           npm run build
 
           # 5. PM2 prosesini yenidən başlat
-          pm2 restart guventurizm-client
+          pm2 restart guventurizm

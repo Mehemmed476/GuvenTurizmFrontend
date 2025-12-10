@@ -100,16 +100,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email ünvanı" className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary" required />
 
                     {/* PASSWORD sahələri (Forgot-da yoxdur) */}
-                    {mode === "register" && (
-                        <input type="password" value={password} onChange={(e) => setCheckPassword(e.target.value)} placeholder="Şifrə" className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary" required />
-                    )}
+
                     {mode !== "forgot" && (
                         <>
-                            <input type="password" value={checkPassword} onChange={(e) => setPassword(e.target.value)} placeholder="Şifrəni təstiqlə" className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary" required />
+                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifrə" className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary" required />
                             {mode === "register" && (
                                 <p className="text-xs text-gray-500 mt-1">Şifrə ən az 8 rəqəmli olmalıdır. En az bir böyük hərf və bir xüsusi simvol olmalıdır</p>
                             )}
                         </>
+                    )}
+                    {mode === "register" && (
+                        <input type="password" value={checkPassword} onChange={(e) => setCheckPassword(e.target.value)} placeholder="Şifrəni təstiqlə" className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary" required />
                     )}
 
 
