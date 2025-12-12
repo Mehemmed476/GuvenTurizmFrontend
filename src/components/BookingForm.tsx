@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import DatePicker from "react-datepicker"; // registerLocale sildik, lazım deyil
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-// date-fns dil paketini import edirik
 import { az } from "date-fns/locale";
 import api from "@/services/api";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext"; // <--- IMPORT ƏLAVƏ EDİLDİ
 
 interface Booking {
     startDate: string;
@@ -22,12 +21,11 @@ interface BookingFormProps {
 }
 
 export default function BookingForm({ houseId, price, existingBookings }: BookingFormProps) {
-    const router = useRouter();
+    const { user } = useAuth(); // <--- User məlumatını context-dən alırıq
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [loading, setLoading] = useState(false);
 
-    // Tarixi UTC problemi olmadan formatlayan funksiya
     const formatDateForBackend = (date: Date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -53,11 +51,12 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
     const days = total > 0 ? total / price : 0;
 
     const handleBooking = async () => {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
+        // DƏYİŞİKLİK: localStorage yerinə Context-dəki user-i yoxlayırıq
+        if (!user) {
             toast.error("Rezervasiya etmək üçün əvvəlcə giriş etməlisiniz!");
             return;
         }
+
         if (!startDate || !endDate) {
             toast.error("Zəhmət olmasa giriş və çıxış tarixlərini seçin.");
             return;
@@ -73,6 +72,7 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
                 status: 0
             };
 
+            // Token avtomatik olaraq api.ts tərəfindən cookie-dən oxunub header-ə qoyulacaq
             await api.post("/Bookings", bookingData);
 
             toast.success("Rezervasiya sorğunuz göndərildi! Təsdiq gözlənilir. 🎉");
@@ -112,13 +112,11 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
                             endDate={endDate}
                             minDate={new Date()}
                             excludeDateIntervals={excludeDateIntervals}
-                            // DƏYİŞİKLİK: locale-i birbaşa obyekt kimi veririk
                             locale={az}
-                            // DƏYİŞİKLİK: formatı sadələşdiririk
                             dateFormat="dd MMMM yyyy"
                             placeholderText="Seçin"
                             className="w-full outline-none text-gray-700 font-medium bg-transparent text-sm cursor-pointer"
-                            onFocus={(e) => e.target.blur()} // Mobil klaviaturanı bağlamaq üçün
+                            onFocus={(e) => e.target.blur()}
                         />
                     </div>
 
