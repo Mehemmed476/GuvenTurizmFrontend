@@ -1,63 +1,68 @@
-import axios from "axios";
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 
-// --- URL MANTIĞI (EN ÖNEMLİ KISIM) ---
-// Eğer tarayıcıdaysak (client) -> https://api.guventurizm.az
-// Eğer sunucudaysak (server/SSR) -> http://localhost:5072 (Docker iç ağına veya Localhost'a gider)
-const API_URL = typeof window === "undefined" 
-    ? "http://localhost:5072/api" 
-    : "https://api.guventurizm.az/api";
-
-export const uploadConfig = {
-    headers: {
-        "Content-Type": "multipart/form-data",
-    },
+// --- URL MƏNTİQİ ---
+// Bu funksiya mühitə görə (Server və ya Brauzer) düzgün URL-i seçir.
+// Gələcəkdə .env faylından idarə etmək üçün 'process.env' istifadə edirik.
+const getBaseUrl = (): string => {
+  // 1. Əgər brauzerdəyiksə (Client Side)
+  if (typeof window !== "undefined") {
+    return process.env.NEXT_PUBLIC_API_URL || "https://api.guventurizm.az/api";
+  }
+  
+  // 2. Əgər serverdəyiksə (SSR / Docker daxili)
+  // Docker daxilində localhost bəzən işləmir, ona görə gələcəkdə bura 
+  // http://backend-service:5072 kimi daxili ad yaza bilərik.
+  return process.env.INTERNAL_API_URL || "http://localhost:5072/api";
 };
 
-const api = axios.create({
-    baseURL: API_URL,
-    headers: {
-        "Content-Type": "application/json",
-    },
+// --- AXIOS INSTANCE ---
+const api: AxiosInstance = axios.create({
+  baseURL: getBaseUrl(),
+  headers: {
+    "Content-Type": "application/json",
+  },
+  // Sorğu 15 saniyə ərzində cavab verməzsə ləğv et (sonsuz gözləmənin qarşısını alır)
+  timeout: 15000, 
 });
 
-// --- REQUEST INTERCEPTOR ---
-api.interceptors.request.use(
-    async (config) => {
-        let token;
+export const uploadConfig = {
+  headers: {
+    "Content-Type": "multipart/form-data",
+  },
+};
 
-        // Tarayıcıdaysak Cookie'den al
-        if (typeof window !== "undefined") {
-            token = Cookies.get("accessToken");
-        } 
-        // Sunucudaysak (SSR), Next.js'in "cookies" kütüphanesini kullanmak gerekir
-        // Ancak basit axios instance'larında bu zordur.
-        // Genellikle SSR'da token'i "getServerSideProps" veya Server Component içinden göndeririz.
-        // Şimdilik burayı boş geçiyoruz, SSR'da public verilere erişim için token gerekmez.
-        
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+// --- REQUEST INTERCEPTOR (Sorğu göndərilmədən öncə) ---
+api.interceptors.request.use(
+  async (config: InternalAxiosRequestConfig) => {
+    // Yalnız brauzerdə işləyərkən Cookie-dən tokeni oxuyuruq
+    if (typeof window !== "undefined") {
+      const token = Cookies.get("accessToken");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+    return config;
+  },
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  }
 );
 
-// --- RESPONSE INTERCEPTOR ---
+// --- RESPONSE INTERCEPTOR (Cavab gəldikdən sonra) ---
 api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response && error.response.status === 401) {
-            if (typeof window !== "undefined") {
-                // Sadece tarayıcıdaysa sil
-                Cookies.remove("accessToken");
-                // Opsiyonel: window.location.href = "/";
-            }
-        }
-        return Promise.reject(error);
+  (response) => response,
+  async (error: AxiosError) => {
+    // Əgər 401 (Unauthorized) xətası gələrsə və biz brauzerdəyiksə
+    if (error.response && error.response.status === 401) {
+      if (typeof window !== "undefined") {
+        Cookies.remove("accessToken");
+        // Ehtiyac olarsa istifadəçini login səhifəsinə yönləndir:
+        // window.location.href = "/auth/login"; 
+      }
     }
+    return Promise.reject(error);
+  }
 );
 
 export default api;
