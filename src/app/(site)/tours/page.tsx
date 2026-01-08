@@ -31,9 +31,9 @@ export default function ToursPage() {
 
     // --- RESİM URL DÜZELTİCİ ---
     const getImageUrl = (path: string) => {
-        if (!path) return "/banner.png";
+        if (!path) return "https://via.placeholder.com/400x300?text=No+Image";
         if (path.startsWith("http")) return path;
-        return `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/${path}`;
+        return `https://api.guventurizm.az/api/files/${path}`;
     };
 
     // --- VERİ ÇEKME ---
