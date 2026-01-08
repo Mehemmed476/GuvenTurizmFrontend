@@ -1,53 +1,75 @@
 import { Metadata } from "next";
 import HouseDetailClient from "@/components/HouseDetailClient";
 
-// Next.js 15-də Params tipi Promise olmalıdır
 type Props = {
     params: Promise<{ id: string }>;
 };
 
-// SEO üçün Metadata generasiyası
+// --- SEO GENERATION ---
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    // ⚠️ DƏYİŞİKLİK: params-ı await edirik
     const { id } = await params;
+
+    // 1. Sadə başlıq (API işləməsə belə bu görünəcək)
+    let title = "Ev Detalları | Güvən Turizm";
+    let description = "Qubada ən yaxşı günlük evlər.";
+    let imageUrl = "https://guventurizm.az/banner.png"; // Saytın statik şəkli (public papkasında olmalıdır)
 
     try {
-        // ⚠️ DƏYİŞİKLİK: Fetch URL-i də hardcoded etdik ki, serverdə xəta verməsin
-        const res = await fetch(`https://api.guventurizm.az/api/Houses/${id}`);
-        const house = await res.json();
+        // 2. Data çəkməyə cəhd edirik (Timeout qoyuruq ki, ilişib qalmasın)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 saniyə vaxt
 
-        // ⚠️ DƏYİŞİKLİK: Şəkil URL-ni birbaşa saytın adından götürürük
-        const ogImage = house.coverImage.startsWith("http")
-            ? house.coverImage
-            : `https://api.guventurizm.az/api/files/${house.coverImage}`;
+        const res = await fetch(`https://api.guventurizm.az/api/Houses/${id}`, {
+            signal: controller.signal,
+            next: { revalidate: 60 } // Hər 60 saniyədən bir yenilə
+        });
+        clearTimeout(timeoutId);
 
-        return {
-            title: `${house.title} | Güvən Turizm`,
-            description: house.description?.substring(0, 150) + "...",
-            openGraph: {
-                title: house.title,
-                description: house.description?.substring(0, 150) + "...",
-                images: [
-                    {
-                        url: ogImage,
-                        width: 800,
-                        height: 600,
-                    },
-                ],
-            },
-        };
+        if (res.ok) {
+            const house = await res.json();
+            title = `${house.title} | Güvən Turizm`;
+            description = house.description?.substring(0, 150) + "..." || description;
+
+            // Şəkil linkini yoxlayırıq
+            if (house.coverImage) {
+                imageUrl = house.coverImage.startsWith("http")
+                    ? house.coverImage
+                    : `https://api.guventurizm.az/api/files/${house.coverImage}`;
+            }
+        }
     } catch (error) {
-        return {
-            title: "Ev Detalları | Güvən Turizm",
-            description: "Qubada ən yaxşı günlük evlər.",
-        };
+        console.error("Metadata xətası:", error);
+        // Xəta olsa belə yuxarıdakı default dəyərlər qalır
     }
+
+    return {
+        title: title,
+        description: description,
+        openGraph: {
+            title: title,
+            description: description,
+            images: [
+                {
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+            type: "website",
+        },
+        // Twitter Kartı üçün
+        twitter: {
+            card: "summary_large_image",
+            title: title,
+            description: description,
+            images: [imageUrl],
+        },
+    };
 }
 
-// Əsas Səhifə Komponenti (Server Component)
+// --- PAGE COMPONENT ---
 export default async function Page({ params }: Props) {
-    // ⚠️ DƏYİŞİKLİK: params-ı await edirik
     const { id } = await params;
-
     return <HouseDetailClient id={id} />;
 }
