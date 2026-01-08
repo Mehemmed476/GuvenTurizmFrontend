@@ -152,8 +152,26 @@ Zəhmət olmasa ödənişi bu karta göndərin və qəbzi bizimlə paylaşın:
 
 Təşəkkürlər!`;
 
-        const cleanPhone = booking.userPhoneNumber.replace(/[^0-9]/g, "");
-        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, "_blank");
+        // --- DÜZELTME BAŞLANGICI ---
+        
+        // 1. Sadece rakamları al
+        let cleanPhone = booking.userPhoneNumber.replace(/[^0-9]/g, "");
+
+        // 2. Başındaki '0'ı kaldır (Örn: 050 -> 50)
+        if (cleanPhone.startsWith("0")) {
+            cleanPhone = cleanPhone.substring(1);
+        }
+
+        // 3. Ülke kodu (994) yoksa ekle (Örn: 50xxxx -> 99450xxxx)
+        // Not: Eğer farklı ülkelerden müşteri alıyorsanız buraya daha detaylı kontrol eklemek gerekebilir.
+        if (!cleanPhone.startsWith("994")) {
+            cleanPhone = "994" + cleanPhone;
+        }
+
+        // 4. Daha güvenilir olan 'api.whatsapp.com' linkini kullan
+        window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`, "_blank");
+        
+        // --- DÜZELTME SONU ---
     };
 
     const getImageUrl = (path?: string) => {

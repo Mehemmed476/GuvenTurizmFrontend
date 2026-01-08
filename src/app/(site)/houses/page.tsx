@@ -129,8 +129,9 @@ function HousesContent() {
     const getImageUrl = (path: string) => {
         if (!path) return "https://via.placeholder.com/400x300?text=No+Image";
         if (path.startsWith("http")) return path;
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "";
-        return `${baseUrl}/api/files/${path}`;
+        
+        // Burayı düzelttik:
+        return `https://api.guventurizm.az/api/files/${path}`;
     };
 
     return (
