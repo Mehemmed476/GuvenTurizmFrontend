@@ -5,8 +5,9 @@ import { useSearchParams } from "next/navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyCardSkeleton from "@/components/PropertyCardSkeleton";
 import api from "@/services/api";
+import PriceRangeSlider from "@/components/PriceRangeSlider";
 
-// --- YERLİ TİPLƏR (Heç yerə daşımırıq) ---
+// --- YERLİ TİPLƏR ---
 interface Category {
     id: string;
     title: string;
@@ -46,20 +47,26 @@ function HousesContent() {
 
     // PAGINATION STATE-ləri
     const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true); // Daha çox ev varmı?
+    const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false); // "Daha çox" düyməsi üçün
+    const [loadingMore, setLoadingMore] = useState(false);
 
-    // FILTER STATE-ləri
+    // --- INPUT STATE-ləri (Kullanıcının değiştirdiği ama henüz uygulamadığı değerler) ---
     const [selectedCategory, setSelectedCategory] = useState("Hamısı");
-    const [maxPrice, setMaxPrice] = useState(1000);
+    const [minPrice, setMinPrice] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(2000);
     const [minRooms, setMinRooms] = useState(urlMinRooms ? parseInt(urlMinRooms) : 1);
 
-    // İlk Yüklənmə (Kateqoriyalar və İlk Səhifə)
+    // --- APPLIED STATE-ləri (Gerçekten filtrelemede kullanılan değerler) ---
+    const [appliedCategory, setAppliedCategory] = useState("Hamısı");
+    const [appliedMinPrice, setAppliedMinPrice] = useState(0);
+    const [appliedMaxPrice, setAppliedMaxPrice] = useState(2000);
+    const [appliedMinRooms, setAppliedMinRooms] = useState(urlMinRooms ? parseInt(urlMinRooms) : 1);
+
+    // İlk Yüklənmə
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                // Səhifə 1-i və kateqoriyaları yükləyirik
                 const [catsRes, housesRes] = await Promise.all([
                     api.get("/Categories/active"),
                     api.get(`/Houses/active?page=1&size=9`)
@@ -68,7 +75,6 @@ function HousesContent() {
                 setCategories(catsRes.data);
                 setHouses(housesRes.data);
 
-                // Əgər gələn data 9-dan azdırsa, deməli son səhifədir
                 if (housesRes.data.length < 9) setHasMore(false);
 
             } catch (error) {
@@ -92,7 +98,6 @@ function HousesContent() {
             if (response.data.length === 0) {
                 setHasMore(false);
             } else {
-                // Yeni evləri köhnələrin sonuna əlavə et
                 setHouses(prev => [...prev, ...response.data]);
                 setPage(nextPage);
                 if (response.data.length < 9) setHasMore(false);
@@ -104,11 +109,39 @@ function HousesContent() {
         }
     };
 
-    // Filtrləmə Məntiqi
+    // --- FİLTRLƏRİ TƏTBİQ ET (AXTAR BUTONU) ---
+    const handleSearch = () => {
+        setAppliedCategory(selectedCategory);
+        setAppliedMinPrice(minPrice);
+        setAppliedMaxPrice(maxPrice);
+        setAppliedMinRooms(minRooms);
+
+        // İsteğe bağlı: Axtar'a basınca sayfanın başına kaydır
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // --- FİLTRLƏRİ SIFIRLA ---
+    const handleReset = () => {
+        // Inputları sıfırla
+        setSelectedCategory("Hamısı");
+        setMinPrice(0);
+        setMaxPrice(2000);
+        setMinRooms(1);
+
+        // Uygulanan filtreleri de sıfırla (Anında etki etsin diye)
+        setAppliedCategory("Hamısı");
+        setAppliedMinPrice(0);
+        setAppliedMaxPrice(2000);
+        setAppliedMinRooms(1);
+    };
+
+    // Filtrləmə Məntiqi (ARTIK APPLIED DEĞERLERİ KULLANIYOR)
     const filteredHouses = houses.filter((house) => {
-        if (selectedCategory !== "Hamısı" && house.category?.title !== selectedCategory) return false;
-        if (house.price > maxPrice) return false;
-        if (house.numberOfRooms < minRooms) return false;
+        if (appliedCategory !== "Hamısı" && house.category?.title !== appliedCategory) return false;
+
+        if (house.price < appliedMinPrice || house.price > appliedMaxPrice) return false;
+
+        if (house.numberOfRooms < appliedMinRooms) return false;
 
         if (urlStartDate && urlEndDate) {
             const start = new Date(urlStartDate);
@@ -129,8 +162,6 @@ function HousesContent() {
     const getImageUrl = (path: string) => {
         if (!path) return "https://via.placeholder.com/400x300?text=No+Image";
         if (path.startsWith("http")) return path;
-        
-        // Burayı düzelttik:
         return `https://api.guventurizm.az/api/files/${path}`;
     };
 
@@ -171,33 +202,90 @@ function HousesContent() {
                                 </div>
                             </div>
 
-                            {/* Digər filtrlər... */}
-                            <div className="mb-6">
-                                <div className="flex justify-between mb-2">
-                                    <h4 className="font-semibold text-gray-700">Min. Otaq</h4>
-                                    <span className="font-bold text-primary">{minRooms}</span>
+                            {/* Otaq Sayı */}
+                            <div className="mb-8">
+                                <h4 className="font-semibold text-gray-700 mb-3">Otaq Sayı</h4>
+                                <div className="flex flex-col gap-4">
+                                    <button
+                                        onClick={() => setMinRooms(1)}
+                                        className={`w-full py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border ${minRooms === 1
+                                                ? "bg-primary text-white border-primary shadow-md"
+                                                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                                            }`}
+                                    >
+                                        Hamısı
+                                    </button>
+
+                                    <div className={`transition-opacity duration-300 ${minRooms === 1 ? 'opacity-60 hover:opacity-100' : 'opacity-100'}`}>
+                                        <div className="flex justify-between mb-2 text-xs font-medium text-gray-500">
+                                            <span>Min. Limit</span>
+                                            <span className="text-gray-900 font-bold">{minRooms} Otaq</span>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="1"
+                                            max="10"
+                                            step="1"
+                                            value={minRooms}
+                                            onChange={(e) => setMinRooms(Number(e.target.value))}
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        />
+                                        <div className="flex justify-between mt-1 text-[10px] text-gray-400">
+                                            <span>1</span>
+                                            <span>10+</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <input type="range" min="1" max="10" step="1" value={minRooms} onChange={(e) => setMinRooms(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" />
                             </div>
 
-                            <div className="mb-6">
-                                <div className="flex justify-between mb-2">
-                                    <h4 className="font-semibold text-gray-700">Maks. Qiymət</h4>
-                                    <span className="font-bold text-primary">{maxPrice} ₼</span>
-                                </div>
-                                <input type="range" min="50" max="2000" step="50" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" />
+                            {/* Qiymət Aralığı */}
+                            <div className="mb-8">
+                                <h4 className="font-semibold text-gray-700 mb-2">Qiymət Aralığı</h4>
+                                <PriceRangeSlider
+                                    min={0}
+                                    max={2000}
+                                    initialMin={minPrice}
+                                    initialMax={maxPrice}
+                                    onChange={(min, max) => {
+                                        setMinPrice(min);
+                                        setMaxPrice(max);
+                                    }}
+                                />
                             </div>
 
-                            <button onClick={() => { setSelectedCategory("Hamısı"); setMaxPrice(2000); setMinRooms(1); }} className="w-full py-2 text-sm text-gray-500 hover:text-red-500 font-medium transition-colors border border-gray-200 rounded-lg">Filtrləri Təmizlə</button>
+                            {/* --- BUTONLAR --- */}
+                            <div className="flex flex-col gap-3 mt-4">
+                                {/* Axtar Butonu */}
+                                <button
+                                    onClick={handleSearch}
+                                    className="w-full py-3 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:bg-gray-800 hover:shadow-xl transition-all active:scale-95"
+                                >
+                                    Axtar
+                                </button>
+
+                                {/* Reset Butonu */}
+                                <button
+                                    onClick={handleReset}
+                                    className="w-full py-3 text-sm text-gray-500 hover:text-red-500 font-medium transition-colors border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-200"
+                                >
+                                    Filtrləri Təmizlə
+                                </button>
+                            </div>
+
                         </div>
                     </aside>
 
                     {/* --- SAĞ TƏRƏF: EVLƏR --- */}
                     <div className="w-full lg:w-3/4">
-                        <div className="mb-6">
+                        <div className="mb-6 flex justify-between items-center">
                             <p className="text-gray-500">
-                                <span className="font-bold text-gray-900">{filteredHouses.length}</span> ev göstərilir
+                                <span className="font-bold text-gray-900">{filteredHouses.length}</span> ev tapıldı
                             </p>
+
+                            {/* Küçük bir bilgilendirme (Mobil için faydalı olabilir) */}
+                            {filteredHouses.length === 0 && (
+                                <span className="text-sm text-red-500 font-medium">Heç bir nəticə yoxdur</span>
+                            )}
                         </div>
 
                         {loading ? (
@@ -245,7 +333,7 @@ function HousesContent() {
                             <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
                                 <div className="text-6xl mb-4">🏠❌</div>
                                 <h3 className="text-xl font-bold text-gray-800">Ev Tapılmadı</h3>
-                                <p className="text-gray-500 mt-2">Filtrləri dəyişərək yenidən yoxlayın.</p>
+                                <p className="text-gray-500 mt-2">Zəhmət olmasa filtrləri dəyişib "Axtar" düyməsinə basın.</p>
                             </div>
                         )}
                     </div>

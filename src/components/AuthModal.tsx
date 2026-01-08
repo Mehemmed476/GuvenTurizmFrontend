@@ -1,22 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "@/services/api";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
+// Check-email modunu da tiplere dahil ettik
+export type AuthMode = "login" | "register" | "forgot" | "check-email";
 
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
+    initialMode?: AuthMode; // YENİ: Başlangıç modu (Login veya Register)
 }
 
-// Yeni rejim əlavə etdik: "check-email"
-type AuthMode = "login" | "register" | "forgot" | "check-email";
-
-export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalProps) {
     const { login } = useAuth();
 
-    const [mode, setMode] = useState<AuthMode>("login");
+    const [mode, setMode] = useState<AuthMode>(initialMode);
     const [isLoading, setIsLoading] = useState(false);
 
     // Form Data
@@ -25,6 +27,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [password, setPassword] = useState("");
     const [checkPassword, setCheckPassword] = useState("");
+
+    // Şifre Göster/Gizle
+    const [showPassword, setShowPassword] = useState(false);
+    const [showCheckPassword, setShowCheckPassword] = useState(false);
+
+    // Modal her açıldığında veya initialMode değiştiğinde modu güncelle
+    useEffect(() => {
+        if (isOpen) {
+            setMode(initialMode);
+        }
+    }, [isOpen, initialMode]);
 
     if (!isOpen) return null;
 
@@ -50,7 +63,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 const response = await api.post("/Auths/register", { userName, email, phoneNumber, password, checkPassword });
                 if (response.data.succeeded) {
-                    // DƏYİŞİKLİK: Uğurlu olanda birbaşa login-ə yox, email yoxlama ekranına atırıq
                     setMode("check-email");
                 } else {
                     toast.error(response.data.errors?.[0] || "Xəta");
@@ -75,7 +87,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <div className="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl relative mx-4" onClick={(e) => e.stopPropagation()}>
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 p-2 rounded-full">✕</button>
 
-                {/* --- XÜSUSİ MESAJ EKRANI (Check Email) --- */}
                 {mode === "check-email" ? (
                     <div className="text-center py-4">
                         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -85,15 +96,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         <p className="text-gray-600 mb-6 leading-relaxed">
                             Qeydiyyat uğurla tamamlandı! Zəhmət olmasa, <b>{email}</b> ünvanına göndərilən təsdiq linkinə daxil olun.
                         </p>
-                        <button
-                            onClick={() => setMode("login")}
-                            className="btn-primary w-full py-3 rounded-xl font-bold shadow-lg"
-                        >
+                        <button onClick={() => setMode("login")} className="btn-primary w-full py-3 rounded-xl font-bold shadow-lg">
                             Giriş Səhifəsinə Qayıt
                         </button>
                     </div>
                 ) : (
-                    // --- DİGƏR FORMLAR (Login, Register, Forgot) ---
                     <>
                         <h2 className="text-3xl font-extrabold text-gray-900 mb-2 text-center">
                             {mode === "login" && "Xoş Gəldiniz!"}
@@ -107,7 +114,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         </p>
 
                         <form className="space-y-4" onSubmit={handleSubmit}>
-
                             {mode === "register" && (
                                 <>
                                     <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="İstifadəçi Adı" className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary" required />
@@ -119,21 +125,42 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                             {mode !== "forgot" && (
                                 <>
-                                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifrə" className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary" required />
-                                    {mode === "register" && (
-                                        <p className="text-xs text-gray-500 mt-1">Şifrə ən az 8 rəqəmli, böyük hərf və simvol daxil etməlidir.</p>
-                                    )}
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Şifrə"
+                                            className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary pr-10"
+                                            required
+                                        />
+                                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                                            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                                        </button>
+                                    </div>
+                                    {mode === "register" && <p className="text-xs text-gray-500 mt-1">Şifrə ən az 8 rəqəmli, böyük hərf və simvol daxil etməlidir.</p>}
                                 </>
                             )}
+
                             {mode === "register" && (
-                                <input type="password" value={checkPassword} onChange={(e) => setCheckPassword(e.target.value)} placeholder="Şifrəni təstiqlə" className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary" required />
+                                <div className="relative">
+                                    <input
+                                        type={showCheckPassword ? "text" : "password"}
+                                        value={checkPassword}
+                                        onChange={(e) => setCheckPassword(e.target.value)}
+                                        placeholder="Şifrəni təstiqlə"
+                                        className="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-primary pr-10"
+                                        required
+                                    />
+                                    <button type="button" onClick={() => setShowCheckPassword(!showCheckPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                                        {showCheckPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                                    </button>
+                                </div>
                             )}
 
                             {mode === "login" && (
                                 <div className="text-right">
-                                    <button type="button" onClick={() => setMode("forgot")} className="text-sm text-primary font-bold hover:underline">
-                                        Şifrəmi unutdum
-                                    </button>
+                                    <button type="button" onClick={() => setMode("forgot")} className="text-sm text-primary font-bold hover:underline">Şifrəmi unutdum</button>
                                 </div>
                             )}
 
@@ -143,12 +170,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         </form>
 
                         <div className="mt-6 text-center text-gray-600 text-sm">
-                            {mode === "login" && (
-                                <p>Hesabınız yoxdur? <button onClick={() => setMode("register")} className="text-primary font-bold hover:underline">Qeydiyyat</button></p>
-                            )}
-                            {(mode === "register" || mode === "forgot") && (
-                                <p>Artıq hesabınız var? <button onClick={() => setMode("login")} className="text-primary font-bold hover:underline">Daxil olun</button></p>
-                            )}
+                            {mode === "login" && <p>Hesabınız yoxdur? <button onClick={() => setMode("register")} className="text-primary font-bold hover:underline">Qeydiyyat</button></p>}
+                            {(mode === "register" || mode === "forgot") && <p>Artıq hesabınız var? <button onClick={() => setMode("login")} className="text-primary font-bold hover:underline">Daxil olun</button></p>}
                         </div>
                     </>
                 )}

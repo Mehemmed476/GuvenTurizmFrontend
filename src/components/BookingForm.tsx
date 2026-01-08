@@ -6,7 +6,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import { az } from "date-fns/locale";
 import api from "@/services/api";
 import toast from "react-hot-toast";
-import { useAuth } from "@/context/AuthContext"; // <--- IMPORT ƏLAVƏ EDİLDİ
+import { useAuth } from "@/context/AuthContext";
+// 1. AuthModal-ı import etdik
+import AuthModal, { AuthMode } from "@/components/AuthModal";
 
 interface Booking {
     startDate: string;
@@ -21,10 +23,16 @@ interface BookingFormProps {
 }
 
 export default function BookingForm({ houseId, price, existingBookings }: BookingFormProps) {
-    const { user } = useAuth(); // <--- User məlumatını context-dən alırıq
+    const { user } = useAuth();
+
+    // Form Stateləri
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [loading, setLoading] = useState(false);
+
+    // 2. Modal üçün Statelər
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authMode, setAuthMode] = useState<AuthMode>("login");
 
     const formatDateForBackend = (date: Date) => {
         const year = date.getFullYear();
@@ -51,9 +59,10 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
     const days = total > 0 ? total / price : 0;
 
     const handleBooking = async () => {
-        // DƏYİŞİKLİK: localStorage yerinə Context-dəki user-i yoxlayırıq
+        // 3. Giriş yoxlanışı: İstifadəçi yoxdursa, Register modalını aç
         if (!user) {
-            toast.error("Rezervasiya etmək üçün əvvəlcə giriş etməlisiniz!");
+            setAuthMode("register"); // Modu "register" qoy
+            setIsAuthModalOpen(true); // Modalı aç
             return;
         }
 
@@ -72,7 +81,6 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
                 status: 0
             };
 
-            // Token avtomatik olaraq api.ts tərəfindən cookie-dən oxunub header-ə qoyulacaq
             await api.post("/Bookings", bookingData);
 
             toast.success("Rezervasiya sorğunuz göndərildi! Təsdiq gözlənilir. 🎉");
@@ -169,6 +177,13 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
             <p className="text-center text-xs text-gray-400 mt-3">
                 Sizdən hələlik heç bir ödəniş tutulmur.
             </p>
+
+            {/* 4. AuthModal Bileşeni */}
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+                initialMode={authMode}
+            />
         </div>
     );
 }

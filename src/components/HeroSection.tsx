@@ -3,12 +3,13 @@
 import { useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { az } from "date-fns/locale";
-import { useRouter } from "next/navigation"; // <--- Yönləndirmə üçün
+import { useRouter } from "next/navigation";
+import { FaCalendarAlt, FaBed, FaSearch } from "react-icons/fa"; // İkonlar varsa istifadə edək, yoxdursa SVG qalır
 
 registerLocale("az", az);
 
 export default function HeroSection() {
-    const router = useRouter(); // <--- Router-i çağırırıq
+    const router = useRouter();
 
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
@@ -16,10 +17,6 @@ export default function HeroSection() {
 
     // --- AXTARIŞ FUNKSİYASI ---
     const handleSearch = () => {
-        // 1. Tarixləri yoxla (seçilibmi?)
-        // Əgər tarix seçilməyibsə, istifadəçini sadəcə /houses səhifəsinə ata bilərik
-        // və ya xəbərdarlıq verə bilərik. Gəl sadəcə yönləndirək.
-
         const params = new URLSearchParams();
 
         if (startDate) {
@@ -32,12 +29,12 @@ export default function HeroSection() {
             params.append("minRooms", roomCount);
         }
 
-        // 2. İstifadəçini yönləndir: /houses?startDate=...&minRooms=2
         router.push(`/houses?${params.toString()}`);
     };
 
     return (
-        <div className="relative h-[85vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden">
+        // DƏYİŞİKLİK 1: h-[85vh] əvəzinə min-h-[85vh] və py-24 (mobildə boşluq üçün)
+        <div className="relative min-h-[85vh] w-full flex items-center justify-center overflow-hidden py-24 md:py-0 bg-gray-900">
 
             {/* --- ARKA PLAN --- */}
             <div className="absolute inset-0 z-0">
@@ -53,13 +50,13 @@ export default function HeroSection() {
                     <span className="text-primary">İstirahəti Tapın</span>
                 </h1>
 
-                <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-medium drop-shadow-md">
+                <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-medium drop-shadow-md px-4">
                     Meşənin sərinliyi, dağların əzəməti. Qubanın ən gözəl
                     günlük kirayə evləri və kotecələri sizi gözləyir.
                 </p>
 
                 {/* --- ARAMA KUTUSU --- */}
-                <div className="bg-white p-4 rounded-2xl shadow-2xl max-w-5xl mx-auto flex flex-col md:flex-row items-end gap-4 animate-fadeIn z-20 relative">
+                <div className="bg-white p-4 rounded-3xl shadow-2xl max-w-5xl mx-auto flex flex-col md:flex-row items-end gap-4 animate-fadeIn z-20 relative">
 
                     {/* 1. Giriş Tarihi */}
                     <div className="flex-1 w-full text-left">
@@ -129,8 +126,8 @@ export default function HeroSection() {
 
                     {/* 4. Arama Butonu */}
                     <button
-                        onClick={handleSearch} // <--- Düyməyə funksiyanı bağladıq
-                        className="w-full md:w-auto btn-primary px-8 py-3.5 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg h-[50px] mb-[1px]"
+                        onClick={handleSearch}
+                        className="w-full md:w-auto btn-primary px-8 py-3.5 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg h-[50px] mb-[1px] hover:shadow-xl transition-all active:scale-95"
                     >
                         <span>Axtar</span>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,9 +136,15 @@ export default function HeroSection() {
                     </button>
                 </div>
 
-                {/* Alt Bilgi */}
-                <div className="mt-8 text-white/80 text-sm font-medium">
-                    Qəçrəş • Təngəaltı • Xınalıq • Qırmızı Qəsəbə
+                {/* DƏYİŞİKLİK 2: Mətn mobilə uyğunlaşdırıldı */}
+                <div className="mt-10 text-white/90 text-sm font-medium flex flex-wrap justify-center gap-3 px-2 leading-relaxed">
+                    <span className="whitespace-nowrap">Qəçrəş</span>
+                    <span className="hidden sm:inline text-white/50">•</span>
+                    <span className="whitespace-nowrap">Təngəaltı</span>
+                    <span className="hidden sm:inline text-white/50">•</span>
+                    <span className="whitespace-nowrap">Xınalıq</span>
+                    <span className="hidden sm:inline text-white/50">•</span>
+                    <span className="whitespace-nowrap">Qırmızı Qəsəbə</span>
                 </div>
 
             </div>
