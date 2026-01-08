@@ -44,7 +44,9 @@ export default function TourDetailPage() {
     const getImageUrl = (path: string) => {
         if (!path) return "/banner.png";
         if (path.startsWith("http")) return path;
-        return `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/${path}`;
+
+        // Birbaşa canlı serverdən çəksin (Localhost problemi olmasın)
+        return `https://api.guventurizm.az/api/files/${path}`;
     };
 
     useEffect(() => {
