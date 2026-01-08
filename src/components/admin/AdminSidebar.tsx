@@ -10,6 +10,7 @@ export default function AdminSidebar() {
     const menuItems = [
         { name: "Dashboard", path: "/admin", icon: "📊" },
         { name: "Evlər", path: "/admin/houses", icon: "🏠" },
+        { name: "Turlar", path: "/admin/tours", icon: "🌍" },
         { name: "Rezervasiyalar", path: "/admin/bookings", icon: "📅" },
         { name: "Suallar (FAQ)", path: "/admin/faqs", icon: "❓" },
         { name: "İstifadəçilər", path: "/admin/users", icon: "👥" },
@@ -45,8 +46,8 @@ export default function AdminSidebar() {
                             key={item.path}
                             href={item.path}
                             className={`relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 font-medium group ${active
-                                    ? "bg-gradient-to-r from-primary to-orange-600 text-white shadow-lg shadow-orange-500/25 translate-x-1"
-                                    : "text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1"
+                                ? "bg-gradient-to-r from-primary to-orange-600 text-white shadow-lg shadow-orange-500/25 translate-x-1"
+                                : "text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1"
                                 }`}
                         >
                             <span className={`text-xl transition-transform duration-300 ${active ? "scale-110" : "group-hover:scale-110"}`}>{item.icon}</span>

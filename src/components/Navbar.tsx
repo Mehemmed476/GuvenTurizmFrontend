@@ -73,6 +73,7 @@ export default function Navbar() {
                         <nav className="hidden md:flex space-x-8 items-center">
                             <Link href="/" className={`${isActive("/")} transition-colors`}>Əsas Səhifə</Link>
                             <Link href="/houses" className={`${isActive("/houses")} transition-colors`}>Evlərimiz</Link>
+                            <Link href="/tours" className={`${isActive("/tours")} transition-colors`}>Turlar</Link>
                             <Link href="/about" className={`${isActive("/about")} transition-colors`}>Haqqımızda</Link>
                         </nav>
 
@@ -154,6 +155,7 @@ export default function Navbar() {
                             <div className="flex flex-col space-y-3 mt-4">
                                 <Link href="/" className={`block px-4 py-2 rounded-lg ${isActive("/")}`} onClick={() => setIsOpen(false)}>Əsas Səhifə</Link>
                                 <Link href="/houses" className={`block px-4 py-2 rounded-lg ${isActive("/houses")}`} onClick={() => setIsOpen(false)}>Evlərimiz</Link>
+                                <Link href="/tours" className={`block px-4 py-2 rounded-lg ${isActive("/tours")}`} onClick={() => setIsOpen(false)}>Turlar</Link>
                                 <Link href="/about" className={`block px-4 py-2 rounded-lg ${isActive("/about")}`} onClick={() => setIsOpen(false)}>Haqqımızda</Link>
 
                                 <hr className="border-gray-100 my-2" />
