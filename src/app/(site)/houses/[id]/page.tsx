@@ -8,21 +8,18 @@ type Props = {
 
 // SEO üçün Metadata generasiyası
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    // API URL
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
     // ⚠️ DƏYİŞİKLİK: params-ı await edirik
     const { id } = await params;
 
     try {
-        // Server tərəfdə sadə fetch
-        const res = await fetch(`${API_URL}/Houses/${id}`);
+        // ⚠️ DƏYİŞİKLİK: Fetch URL-i də hardcoded etdik ki, serverdə xəta verməsin
+        const res = await fetch(`https://api.guventurizm.az/api/Houses/${id}`);
         const house = await res.json();
 
-        // Şəkil URL-ni düzəltmək
+        // ⚠️ DƏYİŞİKLİK: Şəkil URL-ni birbaşa saytın adından götürürük
         const ogImage = house.coverImage.startsWith("http")
             ? house.coverImage
-            : `${API_URL?.replace("/api", "")}/api/files/${house.coverImage}`;
+            : `https://api.guventurizm.az/api/files/${house.coverImage}`;
 
         return {
             title: `${house.title} | Güvən Turizm`,
