@@ -29,9 +29,6 @@ export default function AboutPage() {
                                 <Link href="/houses" className="btn-primary px-8 py-3 rounded-xl font-bold shadow-lg">
                                     Evlərimizə Baxın
                                 </Link>
-                                <Link href="/contact" className="px-8 py-3 rounded-xl font-bold text-gray-700 border border-gray-300 hover:bg-gray-100 transition-colors">
-                                    Əlaqə
-                                </Link>
                             </div>
                         </div>
 

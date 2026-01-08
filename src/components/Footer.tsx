@@ -72,7 +72,6 @@ export default function Footer() {
                             <li><Link href="/" className="hover:text-primary transition-colors hover:translate-x-1 inline-block">Ana Səhifə</Link></li>
                             <li><Link href="/houses" className="hover:text-primary transition-colors hover:translate-x-1 inline-block">Evlər</Link></li>
                             <li><Link href="/about" className="hover:text-primary transition-colors hover:translate-x-1 inline-block">Haqqımızda</Link></li>
-                            <li><Link href="/contact" className="hover:text-primary transition-colors hover:translate-x-1 inline-block">Əlaqə</Link></li>
                         </ul>
                     </div>
 
