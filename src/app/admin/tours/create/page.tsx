@@ -10,7 +10,6 @@ export default function CreateTourPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
-    // --- FORM DATA ---
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -22,25 +21,20 @@ export default function CreateTourPage() {
 
     const [files, setFiles] = useState<FileList | null>(null);
 
-    // --- PAKETLƏR MƏNTİQİ ---
-    // Paketləri dinamik idarə edirik
     const [packages, setPackages] = useState([
         { packageName: "Ekonomik", price: "", discountPrice: "", inclusions: "" }
     ]);
 
-    // Yeni paket əlavə etmək
     const addPackage = () => {
         setPackages([...packages, { packageName: "", price: "", discountPrice: "", inclusions: "" }]);
     };
 
-    // Paketi silmək
     const removePackage = (index: number) => {
         const newPackages = [...packages];
         newPackages.splice(index, 1);
         setPackages(newPackages);
     };
 
-    // Paket daxilində dəyişiklik
     const handlePackageChange = (index: number, field: string, value: string) => {
         const newPackages = [...packages];
         // @ts-ignore
@@ -48,7 +42,6 @@ export default function CreateTourPage() {
         setPackages(newPackages);
     };
 
-    // --- GÖNDƏRMƏ (SUBMIT) ---
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -56,35 +49,36 @@ export default function CreateTourPage() {
         try {
             const data = new FormData();
 
-            // Əsas məlumatlar
             data.append("Title", formData.title);
             data.append("Description", formData.description);
             data.append("Location", formData.location);
             data.append("DurationDay", formData.durationDay.toString());
             data.append("DurationNight", formData.durationNight.toString());
+
+            // Tarih boşsa gönderme (Backend nullable bekliyorsa)
             if (formData.startDate) data.append("StartDate", formData.startDate);
 
-            // Şəkillər
             if (files) {
                 for (let i = 0; i < files.length; i++) {
                     data.append("Files", files[i]);
                 }
             }
 
-            // Paketlər (Complex Object List mapping)
             packages.forEach((pkg, index) => {
                 data.append(`Packages[${index}].PackageName`, pkg.packageName);
-                data.append(`Packages[${index}].Price`, pkg.price);
-                if (pkg.discountPrice) data.append(`Packages[${index}].DiscountPrice`, pkg.discountPrice);
+                // Boş string yerine 0 veya değeri gönder
+                data.append(`Packages[${index}].Price`, pkg.price || "0");
 
-                // Özəllikləri "vergül" və ya "yeni sətir" ilə ayırıb listə çeviririk
+                if (pkg.discountPrice) {
+                    data.append(`Packages[${index}].DiscountPrice`, pkg.discountPrice);
+                }
+
                 const inclusionList = pkg.inclusions.split(/\n|,/).map(s => s.trim()).filter(s => s !== "");
                 inclusionList.forEach((inc, incIndex) => {
                     data.append(`Packages[${index}].Inclusions[${incIndex}]`, inc);
                 });
             });
 
-            // API İstəyi (Multipart/Form-Data avtomatik gedəcək)
             await api.post("/Tours", data, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
@@ -92,15 +86,17 @@ export default function CreateTourPage() {
             alert("Tur uğurla yaradıldı!");
             router.push("/admin/tours");
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Yaratma xətası:", error);
-            alert("Xəta baş verdi. Zəhmət olmasa məlumatları yoxlayın.");
+            const msg = error.response?.data?.title || "Xəta baş verdi.";
+            alert(`Xəta: ${msg}`);
         } finally {
             setLoading(false);
         }
     };
 
     return (
+        // ... (JSX KISMI AYNI KALABİLİR, SADECE FORM MANTIĞI ÖNEMLİYDİ)
         <div className="p-8 max-w-4xl mx-auto">
             <Link href="/admin/tours" className="flex items-center text-gray-500 mb-6 hover:text-gray-900">
                 <ArrowLeftIcon className="w-4 h-4 mr-1" /> Geriyə qayıt
@@ -109,7 +105,6 @@ export default function CreateTourPage() {
             <h1 className="text-2xl font-bold mb-8 text-gray-900">Yeni Tur Yarat</h1>
 
             <form onSubmit={handleSubmit} className="space-y-8">
-
                 {/* --- ƏSAS MƏLUMATLAR --- */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-bold mb-4">Əsas Məlumatlar</h2>
@@ -158,7 +153,6 @@ export default function CreateTourPage() {
                         onChange={(e) => setFiles(e.target.files)}
                         className="w-full p-2 border border-dashed border-gray-300 rounded-lg"
                     />
-                    <p className="text-xs text-gray-500 mt-2">Birdən çox şəkil seçə bilərsiniz.</p>
                 </div>
 
                 {/* --- PAKETLƏR --- */}
@@ -193,7 +187,7 @@ export default function CreateTourPage() {
                                             value={pkg.price} onChange={e => handlePackageChange(index, 'price', e.target.value)} required />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-bold uppercase text-gray-500">Endirimli Qiymət (Varsa)</label>
+                                        <label className="text-xs font-bold uppercase text-gray-500">Endirimli Qiymət</label>
                                         <input type="number" placeholder="0" className="w-full p-2 border rounded bg-white"
                                             value={pkg.discountPrice} onChange={e => handlePackageChange(index, 'discountPrice', e.target.value)} />
                                     </div>
@@ -213,13 +207,8 @@ export default function CreateTourPage() {
                     </div>
                 </div>
 
-                {/* --- SUBMIT BUTTON --- */}
                 <div className="flex justify-end">
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition disabled:opacity-50"
-                    >
+                    <button type="submit" disabled={loading} className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition disabled:opacity-50">
                         {loading ? "Yaradılır..." : "Turu Yadda Saxla"}
                     </button>
                 </div>

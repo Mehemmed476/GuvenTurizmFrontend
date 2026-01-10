@@ -7,34 +7,12 @@ import { ArrowLeftIcon, TrashIcon, PlusIcon, XMarkIcon } from "@heroicons/react/
 import Link from "next/link";
 import Image from "next/image";
 
-// Backend-dən gələn data tipləri
-interface TourPackage {
-    packageName: string;
-    price: number | string;
-    discountPrice?: number | string;
-    inclusions: string[]; // String listəsi kimi gəlir
-}
-
-interface TourDetail {
-    id: string;
-    title: string;
-    description: string;
-    location: string;
-    durationDay: number;
-    durationNight: number;
-    startDate?: string;
-    imageUrls: string[]; // Şəkil yolları
-    packages: TourPackage[];
-    tourFiles?: { id: string; path: string; isMain: boolean }[]; // Şəkil ID-ləri lazım ola bilər
-}
-
 export default function EditTourPage() {
     const router = useRouter();
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
-    // --- STATE ---
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -46,8 +24,8 @@ export default function EditTourPage() {
 
     // Şəkillər
     const [existingImages, setExistingImages] = useState<{ id: string; url: string }[]>([]);
-    const [imagesToDelete, setImagesToDelete] = useState<string[]>([]); // Silinəcək şəkillərin ID-ləri
-    const [newFiles, setNewFiles] = useState<FileList | null>(null); // Yeni yüklənən şəkillər
+    const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+    const [newFiles, setNewFiles] = useState<FileList | null>(null);
 
     // Paketlər
     const [packages, setPackages] = useState<any[]>([
@@ -56,8 +34,11 @@ export default function EditTourPage() {
 
     // Resim URL Düzeltici
     const getImageUrl = (path: string) => {
+        if (!path) return "";
         if (path.startsWith("http")) return path;
-        return `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/${path}`;
+        // API URL'den /api'yi çıkarıp kök adresi alıyoruz
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || "http://localhost:5072";
+        return `${baseUrl}/api/files/${path}`;
     };
 
     // --- MƏLUMATLARI GƏTİR ---
@@ -69,31 +50,55 @@ export default function EditTourPage() {
 
                 // Formu doldur
                 setFormData({
-                    title: data.title,
-                    description: data.description,
-                    location: data.location,
-                    durationDay: data.durationDay,
-                    durationNight: data.durationNight,
+                    title: data.title || "",
+                    description: data.description || "",
+                    location: data.location || "",
+                    durationDay: data.durationDay || 1,
+                    durationNight: data.durationNight || 0,
                     startDate: data.startDate ? data.startDate.split('T')[0] : "",
                 });
 
-                // Şəkilləri ayarla (Backend TourFiles qaytarmalıdır, əgər sadəcə url qaytarırsa ID tapmaq çətin ola bilər. 
-                // Backenddə GetById metodunda 'TourFiles' include etmişdik, ona görə ID-ləri oradan alacağıq)
-                if (data.tourFiles) {
-                    setExistingImages(data.tourFiles.map((f: any) => ({
+                // --- ŞƏKİL GÖSTERME SORUNUNU ÇÖZME ---
+                // Backend 'ImageUrls' (string list) veya 'TourFiles' (obj list) dönebilir.
+                // Eğer ID yoksa, silme işlemi yapamayız ama en azından gösterelim.
+                let images: any[] = [];
+
+                if (data.tourFiles && data.tourFiles.length > 0) {
+                    // İdeal durum: Backend ID'leri gönderiyor
+                    images = data.tourFiles.map((f: any) => ({
                         id: f.id,
                         url: getImageUrl(f.path)
-                    })));
-                }
-
-                // Paketləri ayarla
-                if (data.packages) {
-                    const formattedPackages = data.packages.map((p: any) => ({
-                        packageName: p.packageName,
-                        price: p.price,
-                        discountPrice: p.discountPrice || "",
-                        inclusions: Array.isArray(p.inclusions) ? p.inclusions.join("\n") : p.inclusions
                     }));
+                } else if (data.imageUrls && data.imageUrls.length > 0) {
+                    // Kötü durum: Sadece URL var, ID yok (Silme çalışmaz)
+                    console.warn("Diqqət: Backend şəkil ID-lərini göndərmir. Silmə işləməyəcək.");
+                    images = data.imageUrls.map((url: string, index: number) => ({
+                        id: `temp_id_${index}`, // Sahte ID
+                        url: getImageUrl(url)
+                    }));
+                }
+                setExistingImages(images);
+
+                // --- PAKET GÖSTERME SORUNUNU ÇÖZME ---
+                if (data.packages) {
+                    const formattedPackages = data.packages.map((p: any) => {
+                        // Inclusions string listesi mi yoksa obje listesi mi? Kontrol et.
+                        let inclusionsText = "";
+                        if (Array.isArray(p.inclusions)) {
+                            // Eğer string array ise join et
+                            // Eğer obje array ise (örn: [{description: "wifi"}]), map et
+                            inclusionsText = p.inclusions
+                                .map((inc: any) => (typeof inc === 'object' ? inc.description : inc))
+                                .join("\n");
+                        }
+
+                        return {
+                            packageName: p.packageName,
+                            price: p.price,
+                            discountPrice: p.discountPrice || "",
+                            inclusions: inclusionsText
+                        };
+                    });
                     setPackages(formattedPackages);
                 }
 
@@ -109,7 +114,7 @@ export default function EditTourPage() {
         if (id) fetchTour();
     }, [id, router]);
 
-    // --- PAKET MƏNTİQİ ---
+    // --- LOGIC FUNCTIONS (Aynı Kalabilir) ---
     const addPackage = () => {
         setPackages([...packages, { packageName: "", price: "", discountPrice: "", inclusions: "" }]);
     };
@@ -126,15 +131,15 @@ export default function EditTourPage() {
         setPackages(newPackages);
     };
 
-    // --- ŞƏKİL SİLMƏ ---
     const handleDeleteExistingImage = (imageId: string) => {
-        // UI-dan sil
+        if (imageId.startsWith("temp_id_")) {
+            alert("Backend bu şəklin ID-sini göndərmədiyi üçün silmək mümkün deyil.");
+            return;
+        }
         setExistingImages(prev => prev.filter(img => img.id !== imageId));
-        // Silinəcəklər siyahısına at
         setImagesToDelete(prev => [...prev, imageId]);
     };
 
-    // --- YADDA SAXLA (UPDATE) ---
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
@@ -142,7 +147,6 @@ export default function EditTourPage() {
         try {
             const data = new FormData();
 
-            // Əsas Məlumatlar
             data.append("Title", formData.title);
             data.append("Description", formData.description);
             data.append("Location", formData.location);
@@ -150,32 +154,28 @@ export default function EditTourPage() {
             data.append("DurationNight", formData.durationNight.toString());
             if (formData.startDate) data.append("StartDate", formData.startDate);
 
-            // Silinəcək şəkillər (Backend List<Guid> gözləyir)
+            // ID'si olanları sil
             imagesToDelete.forEach((imgId, index) => {
                 data.append(`ImageIdsToDelete[${index}]`, imgId);
             });
 
-            // Yeni şəkillər
             if (newFiles) {
                 for (let i = 0; i < newFiles.length; i++) {
                     data.append("NewImages", newFiles[i]);
                 }
             }
 
-            // Paketlər
             packages.forEach((pkg, index) => {
                 data.append(`Packages[${index}].PackageName`, pkg.packageName);
                 data.append(`Packages[${index}].Price`, pkg.price.toString());
                 if (pkg.discountPrice) data.append(`Packages[${index}].DiscountPrice`, pkg.discountPrice.toString());
 
-                // Özəllikləri parçala
                 const inclusionList = pkg.inclusions.split(/\n|,/).map((s: string) => s.trim()).filter((s: string) => s !== "");
                 inclusionList.forEach((inc: string, incIndex: number) => {
                     data.append(`Packages[${index}].Inclusions[${incIndex}]`, inc);
                 });
             });
 
-            // API PUT Request
             await api.put(`/Tours/${id}`, data, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
@@ -202,7 +202,6 @@ export default function EditTourPage() {
             <h1 className="text-2xl font-bold mb-8 text-gray-900">Turu Yenilə: {formData.title}</h1>
 
             <form onSubmit={handleSubmit} className="space-y-8">
-
                 {/* 1. ƏSAS MƏLUMATLAR */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-bold mb-4">Ümumi Məlumatlar</h2>
@@ -243,8 +242,6 @@ export default function EditTourPage() {
                 {/* 2. ŞƏKİLLƏR */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-bold mb-4">Şəkillər</h2>
-
-                    {/* Mövcud Şəkillər */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         {existingImages.map((img) => (
                             <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border">
@@ -259,8 +256,6 @@ export default function EditTourPage() {
                             </div>
                         ))}
                     </div>
-
-                    {/* Yeni Şəkil Yükləmə */}
                     <label className="block text-sm font-medium mb-2">Yeni Şəkillər Əlavə Et</label>
                     <input
                         type="file"
@@ -290,7 +285,6 @@ export default function EditTourPage() {
                                 >
                                     <TrashIcon className="w-5 h-5" />
                                 </button>
-
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                                     <div>
                                         <label className="text-xs font-bold uppercase text-gray-500">Paket Adı</label>
@@ -326,11 +320,7 @@ export default function EditTourPage() {
                     <Link href="/admin/tours" className="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-bold hover:bg-gray-50">
                         Ləğv et
                     </Link>
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50"
-                    >
+                    <button type="submit" disabled={submitting} className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50">
                         {submitting ? "Yadda Saxlanılır..." : "Yadda Saxla"}
                     </button>
                 </div>
