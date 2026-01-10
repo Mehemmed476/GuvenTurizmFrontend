@@ -51,8 +51,8 @@ export default function HeroSection() {
                 </h1>
 
                 <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-medium drop-shadow-md px-4">
-                    Meşənin sərinliyi, dağların əzəməti. Qubanın ən gözəl
-                    günlük kirayə evləri və kotecələri sizi gözləyir.
+                    Meşənin sərinliyi, dağların əzəməti. Azərbaycanın ən gözəl
+                    günlük kirayə evləri,kotecələri və turları sizi gözləyir.
                 </p>
 
                 {/* --- ARAMA KUTUSU --- */}
