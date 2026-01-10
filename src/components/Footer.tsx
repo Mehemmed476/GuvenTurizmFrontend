@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import api from "@/services/api";
-import { FaInstagram, FaFacebookF, FaWhatsapp, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa"; // <--- İKONLAR
+import { FaInstagram, FaFacebookF, FaWhatsapp, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaTiktok } from "react-icons/fa"; // <--- İKONLAR
 
 export default function Footer() {
     const [settings, setSettings] = useState<Record<string, string>>({});
@@ -60,6 +60,16 @@ export default function Footer() {
                                     title="WhatsApp"
                                 >
                                     <FaWhatsapp className="text-xl text-gray-400 group-hover:text-white transition-colors" />
+                                </a>
+                            )}
+                            {settings["Tiktok"] && (
+                                <a
+                                    href={settings["Tiktok"]}
+                                    target="_blank"
+                                    className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-black hover:text-white transition-all duration-300 group"
+                                    title="TikTok"
+                                >
+                                    <FaTiktok className="text-xl text-gray-400 group-hover:text-white transition-colors" />
                                 </a>
                             )}
                         </div>

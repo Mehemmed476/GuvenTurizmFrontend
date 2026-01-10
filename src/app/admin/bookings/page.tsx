@@ -147,13 +147,13 @@ Güvən Turizm-ə xoş gəlmisiniz.
 🗓 Tarixlər: ${format(start, "d MMM")} - ${format(end, "d MMM")} (${diffDays} gecə)
 💰 Cəmi Məbləğ: *${totalPrice} AZN*
 
-Zəhmət olmasa ödənişi bu karta göndərin və qəbzi bizimlə paylaşın:
+Zəhmət olmasa 100 azn beh ödənişinizi və qəbzi bizimlə paylaşın:
 💳 *${cardNumber}*
 
 Təşəkkürlər!`;
 
         // --- DÜZELTME BAŞLANGICI ---
-        
+
         // 1. Sadece rakamları al
         let cleanPhone = booking.userPhoneNumber.replace(/[^0-9]/g, "");
 
@@ -170,7 +170,7 @@ Təşəkkürlər!`;
 
         // 4. Daha güvenilir olan 'api.whatsapp.com' linkini kullan
         window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`, "_blank");
-        
+
         // --- DÜZELTME SONU ---
     };
 

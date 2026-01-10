@@ -137,6 +137,7 @@ export default function SettingsPage() {
         { key: "Instagram", label: "Instagram Linki", type: "url", placeholder: "https://instagram.com/..." },
         { key: "Facebook", label: "Facebook Linki", type: "url", placeholder: "https://facebook.com/..." },
         { key: "Whatsapp", label: "WhatsApp Linki", type: "url", placeholder: "https://wa.me/..." },
+        { key: "Tiktok", label: "TikTok Linki", type: "url", placeholder: "https://tiktok.com/..." },
         { key: "Copyright", label: "Footer Yazısı", type: "text", placeholder: "© 2025..." },
     ];
 
