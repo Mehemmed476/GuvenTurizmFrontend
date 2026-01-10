@@ -19,7 +19,7 @@ interface TourPackage {
     packageName: string;
     price: number;
     discountPrice?: number;
-    inclusions: string[]; // Backenddən string array gəlir
+    inclusions: { id: number; description: string; isIncluded: boolean }[];
 }
 
 interface TourDetail {
@@ -208,7 +208,7 @@ export default function TourDetailPage() {
                                                     .map((inc, i) => (
                                                         <li key={i} className="flex items-start gap-3 text-gray-600">
                                                             <CheckCircleIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                                                            <span className="text-sm font-medium">{inc}</span>
+                                                            <span className="text-sm font-medium">{inc.description}</span>
                                                         </li>
                                                     ))}
                                             </ul>
