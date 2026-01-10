@@ -36,8 +36,7 @@ export default function EditTourPage() {
     const getImageUrl = (path: string) => {
         if (!path) return "";
         if (path.startsWith("http")) return path;
-        // API URL'den /api'yi çıkarıp kök adresi alıyoruz
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || "http://localhost:5072";
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "";
         return `${baseUrl}/api/files/${path}`;
     };
 
