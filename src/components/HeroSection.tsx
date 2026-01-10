@@ -46,8 +46,8 @@ export default function HeroSection() {
             <div className="relative z-10 container mx-auto px-4 text-center">
 
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight mb-6 drop-shadow-lg">
-                    Qubada Xəyalınızdakı <br />
-                    <span className="text-primary">İstirahəti Tapın</span>
+                    Güvənlə Xəyalınızdakı <br />
+                    <span className="text-primary">İstirahəti Yaşayın</span>
                 </h1>
 
                 <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-medium drop-shadow-md px-4">
