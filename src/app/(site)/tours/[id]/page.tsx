@@ -217,7 +217,7 @@ export default function TourDetailPage() {
                                         {/* Seçim Butonu */}
                                         <div className="p-6 pt-0 mt-auto">
                                             <a
-                                                href={`https://wa.me/994501234567?text=Salam, mən "${tour.title}" turunun "${pkg.packageName}" paketi ilə maraqlanıram.`}
+                                                href={`https://wa.me/994516672079?text=Salam, mən "${tour.title}" turunun "${pkg.packageName}" paketi ilə maraqlanıram.`}
                                                 target="_blank"
                                                 className="block w-full text-center py-3 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition"
                                             >
@@ -241,7 +241,7 @@ export default function TourDetailPage() {
 
                                 <div className="space-y-3">
                                     <a
-                                        href="https://wa.me/994501234567"
+                                        href="https://wa.me/994516672079"
                                         target="_blank"
                                         className="flex items-center justify-center gap-2 w-full py-3.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition shadow-md"
                                     >
@@ -250,7 +250,7 @@ export default function TourDetailPage() {
                                     </a>
 
                                     <a
-                                        href="tel:+994501234567"
+                                        href="tel:+994516672079"
                                         className="flex items-center justify-center gap-2 w-full py-3.5 bg-gray-900 hover:bg-black text-white rounded-xl font-bold transition shadow-md"
                                     >
                                         <PhoneIcon className="w-5 h-5" />

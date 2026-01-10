@@ -75,11 +75,13 @@ export default function EditHousePage() {
     const [imagesToDelete, setImagesToDelete] = useState<string[]>([]); // Silinəcək şəkillərin ID-ləri
 
     // Şəkil URL helper
+    // Şəkil URL helper
     const getImageUrl = (path: string) => {
         if (!path) return "";
         if (path.startsWith("http")) return path;
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "";
-        return `${baseUrl}/api/files/${path}`;
+
+        // Birbaşa canlı serverdən çəksin (Localhost problemi olmasın)
+        return `https://api.guventurizm.az/api/files/${path}`;
     };
 
     // --- DATALARI YÜKLƏ ---
