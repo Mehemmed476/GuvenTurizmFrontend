@@ -147,7 +147,7 @@ Güvən Turizm-ə xoş gəlmisiniz.
 🗓 Tarixlər: ${format(start, "d MMM")} - ${format(end, "d MMM")} (${diffDays} gecə)
 💰 Cəmi Məbləğ: *${totalPrice} AZN*
 
-Zəhmət olmasa 100 azn beh ödənişinizi və qəbzi bizimlə paylaşın:
+Zəhmət olmasa *100 AZN* beh ödənişinizi və qəbzi bizimlə paylaşın:
 💳 *${cardNumber}*
 
 Təşəkkürlər!`;
@@ -175,11 +175,13 @@ Təşəkkürlər!`;
     };
 
     const getImageUrl = (path?: string) => {
-        if (!path) return "https://via.placeholder.com/100?text=No+Image";
+        if (!path) return "https://via.placeholder.com/100";
         if (path.startsWith("http")) return path;
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "";
-        return `${baseUrl}/api/files/${path}`;
+
+        // Məcburi HTTPS ünvanı
+        return `https://api.guventurizm.az/api/files/${path}`;
     };
+
 
     const formatDate = (dateStr: string) => {
         try { return format(new Date(dateStr), "d MMM", { locale: az }); }
