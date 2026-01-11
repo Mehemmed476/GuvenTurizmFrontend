@@ -7,8 +7,9 @@ import { az } from "date-fns/locale";
 import api from "@/services/api";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
-// 1. AuthModal-ı import etdik
 import AuthModal, { AuthMode } from "@/components/AuthModal";
+import Link from "next/link";
+import { FaTimes } from "react-icons/fa"; // X ikonu için (yoksa react-icons kurulu olmalı)
 
 interface Booking {
     startDate: string;
@@ -30,9 +31,12 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [loading, setLoading] = useState(false);
 
-    // 2. Modal üçün Statelər
+    // Modal Stateləri
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authMode, setAuthMode] = useState<AuthMode>("login");
+
+    // YENİ: Şərtlər Modalı üçün State
+    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
     const formatDateForBackend = (date: Date) => {
         const year = date.getFullYear();
@@ -58,11 +62,11 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
     const total = calculateTotal();
     const days = total > 0 ? total / price : 0;
 
-    const handleBooking = async () => {
-        // 3. Giriş yoxlanışı: İstifadəçi yoxdursa, Register modalını aç
+    // 1. İstifadəçi "Rezervasiya Et" butonuna basanda bu işləyir
+    const handleInitialClick = () => {
         if (!user) {
-            setAuthMode("register"); // Modu "register" qoy
-            setIsAuthModalOpen(true); // Modalı aç
+            setAuthMode("register");
+            setIsAuthModalOpen(true);
             return;
         }
 
@@ -71,13 +75,20 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
             return;
         }
 
+        // Hər şey qaydasındadırsa, Şərtlər Modalını aç
+        setIsTermsModalOpen(true);
+    };
+
+    // 2. İstifadəçi şərtləri qəbul edəndə bu işləyir (API Sorğusu)
+    const confirmBooking = async () => {
+        setIsTermsModalOpen(false); // Modalı bağla
         setLoading(true);
 
         try {
             const bookingData = {
                 houseId: houseId,
-                startDate: formatDateForBackend(startDate),
-                endDate: formatDateForBackend(endDate),
+                startDate: formatDateForBackend(startDate!),
+                endDate: formatDateForBackend(endDate!),
                 status: 0
             };
 
@@ -108,7 +119,6 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
 
             <div className="border border-gray-200 rounded-xl mb-4 overflow-hidden">
                 <div className="flex border-b border-gray-200">
-
                     {/* GİRİŞ TARİXİ */}
                     <div className="w-1/2 p-3 border-r border-gray-200">
                         <label className="block text-xs font-bold text-gray-500 uppercase">Giriş</label>
@@ -163,27 +173,75 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
             )}
 
             <button
-                onClick={handleBooking}
+                onClick={handleInitialClick}
                 disabled={loading}
                 className="w-full btn-primary py-4 rounded-xl font-bold text-lg shadow-lg disabled:opacity-70 flex justify-center items-center gap-2"
             >
-                {loading ? (
-                    <>Göndərilir...</>
-                ) : (
-                    "Rezervasiya Et"
-                )}
+                {loading ? "Göndərilir..." : "Rezervasiya Et"}
             </button>
 
             <p className="text-center text-xs text-gray-400 mt-3">
                 Sizdən hələlik heç bir ödəniş tutulmur.
             </p>
 
-            {/* 4. AuthModal Bileşeni */}
+            {/* AuthModal */}
             <AuthModal
                 isOpen={isAuthModalOpen}
                 onClose={() => setIsAuthModalOpen(false)}
                 initialMode={authMode}
             />
+
+            {/* --- YENİ: ŞƏRTLƏR MODALI --- */}
+            {isTermsModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        {/* Header */}
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="font-bold text-lg text-gray-800">Şərtləri Təsdiqləyin</h3>
+                            <button
+                                onClick={() => setIsTermsModalOpen(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+
+                        {/* Body - Scrollable */}
+                        <div className="p-6 overflow-y-auto text-sm text-gray-600 space-y-4">
+                            <p>
+                                Hörmətli <strong>{user?.userName || "Qonaq"}</strong>, rezervasiyanı tamamlamaq üçün aşağıdakı şərtləri qəbul etməlisiniz:
+                            </p>
+                            <ul className="list-disc pl-5 space-y-2">
+                                <li>Giriş saatı 14:00, çıxış saatı 12:00-dır.</li>
+                                <li>Evdə ziyan vurduğunuz əşyalar üçün məsuliyyət daşıyırsınız.</li>
+                                <li>Rezervasiya yalnız ev sahibi təsdiqlədikdən sonra qüvvəyə minir.</li>
+                                <li>Ləğv etmə qaydalarına riayət olunmalıdır.</li>
+                            </ul>
+                            <div className="pt-2 text-primary hover:underline">
+                                <Link href="/terms" target="_blank">
+                                    Tam qaydaları oxumaq üçün bura klikləyin.
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* Footer - Actions */}
+                        <div className="p-4 border-t border-gray-100 flex gap-3 bg-gray-50">
+                            <button
+                                onClick={() => setIsTermsModalOpen(false)}
+                                className="flex-1 py-3 px-4 rounded-xl font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
+                            >
+                                İmtina et
+                            </button>
+                            <button
+                                onClick={confirmBooking}
+                                className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
+                            >
+                                Qəbul edirəm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
