@@ -147,7 +147,7 @@ Güvən Turizm-ə xoş gəlmisiniz.
 🗓 Tarixlər: ${format(start, "d MMM")} - ${format(end, "d MMM")} (${diffDays} gecə)
 💰 Cəmi Məbləğ: *${totalPrice} AZN*
 
-Zəhmət olmasa *100 AZN* beh ödənişinizi və qəbzi bizimlə paylaşın:
+Zəhmət olmasa *100 AZN* avans (beh) ödənişinizi və qəbzi bizimlə paylaşın:
 💳 *${cardNumber}*
 
 Təşəkkürlər!`;
