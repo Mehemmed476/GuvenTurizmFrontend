@@ -93,6 +93,11 @@ export default function CreateHousePage() {
                         <label className="font-bold block mb-2 text-gray-700">Təsvir (Description)</label>
                         <textarea name="Description" required rows={4} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-primary" placeholder="Ev haqqında ətraflı məlumat..."></textarea>
                     </div>
+                    {/* Admin Qeydləri (Yeni) */}
+                    <div>
+                        <label className="font-bold block mb-2 text-gray-700">Admin Qeydləri (Yalnız adminlər görür)</label>
+                        <textarea name="AdminNotes" rows={2} className="w-full p-3 bg-yellow-50 border border-yellow-200 rounded-xl outline-none focus:border-yellow-400 text-gray-700" placeholder="Məs: Ev sahibi ilə razılaşdırılıb ki..."></textarea>
+                    </div>
                 </div>
 
                 {/* --- BÖLMƏ 2: Detallar --- */}

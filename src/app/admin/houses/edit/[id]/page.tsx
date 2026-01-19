@@ -38,6 +38,7 @@ interface HouseDetail {
     categoryId: string;
     houseHouseAdvantageRels: { houseAdvantageId: string }[];
     images: HouseFile[];
+    adminNotes: string;
 }
 
 export default function EditHousePage() {
@@ -55,6 +56,7 @@ export default function EditHousePage() {
     // Form State-ləri
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [adminNotes, setAdminNotes] = useState(""); // YENİ
     const [price, setPrice] = useState<number | "">("");
     const [rooms, setRooms] = useState<number | "">("");
     const [beds, setBeds] = useState<number | "">("");
@@ -102,6 +104,7 @@ export default function EditHousePage() {
                 // Formu doldur
                 setTitle(house.title);
                 setDescription(house.description);
+                setAdminNotes(house.adminNotes || ""); // YENİ
                 setPrice(house.price);
                 setRooms(house.numberOfRooms);
                 setBeds(house.numberOfBeds);
@@ -161,6 +164,7 @@ export default function EditHousePage() {
             formData.append("Id", houseId);
             formData.append("Title", title);
             formData.append("Description", description);
+            formData.append("AdminNotes", adminNotes); // YENİ
             formData.append("Price", price.toString());
             formData.append("NumberOfRooms", rooms.toString());
             formData.append("NumberOfBeds", beds.toString());
@@ -229,6 +233,17 @@ export default function EditHousePage() {
                     <div>
                         <label className="font-bold block mb-2 text-gray-700">Təsvir</label>
                         <textarea value={description} onChange={e => setDescription(e.target.value)} required rows={4} className="w-full p-3 bg-gray-50 border rounded-xl"></textarea>
+                    </div>
+                    {/* Admin Qeydləri (YENİ) */}
+                    <div>
+                        <label className="font-bold block mb-2 text-gray-700">Admin Qeydləri</label>
+                        <textarea
+                            value={adminNotes}
+                            onChange={e => setAdminNotes(e.target.value)}
+                            rows={2}
+                            className="w-full p-3 bg-yellow-50 border border-yellow-200 rounded-xl outline-none focus:border-yellow-400 text-gray-700"
+                            placeholder="Yalnız adminlər üçün qeyd..."
+                        ></textarea>
                     </div>
                 </div>
 

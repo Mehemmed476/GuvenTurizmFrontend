@@ -241,6 +241,7 @@ export default function HouseDetailClient({ id }: { id: string }) {
                             houseId={house.id}
                             price={house.price}
                             existingBookings={house.bookings || []}
+                            houseTitle={house.title}
                         />
                     </div>
                 </div>

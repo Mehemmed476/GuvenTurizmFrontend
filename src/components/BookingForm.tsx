@@ -4,12 +4,13 @@ import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { az } from "date-fns/locale";
+import { format } from "date-fns";
 import api from "@/services/api";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal, { AuthMode } from "@/components/AuthModal";
 import Link from "next/link";
-import { FaTimes } from "react-icons/fa"; // X ikonu için (yoksa react-icons kurulu olmalı)
+import { FaTimes, FaWhatsapp } from "react-icons/fa"; // X ikonu və Whatsapp ikonu
 
 interface Booking {
     startDate: string;
@@ -21,15 +22,31 @@ interface BookingFormProps {
     houseId: string;
     price: number;
     existingBookings: Booking[];
+    houseTitle: string; // YENİ: WhatsApp mesajı üçün
 }
 
-export default function BookingForm({ houseId, price, existingBookings }: BookingFormProps) {
+export default function BookingForm({ houseId, price, existingBookings, houseTitle }: BookingFormProps) {
     const { user } = useAuth();
 
     // Form Stateləri
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [loading, setLoading] = useState(false);
+    const [whatsappNumber, setWhatsappNumber] = useState<string | null>(null);
+
+    // Settings çək
+    useState(() => {
+        api.get("/Common/settings")
+            .then(res => {
+                if (res.data && res.data["Whatsapp"]) {
+                    setWhatsappNumber(res.data["Whatsapp"]);
+                } else if (res.data && res.data["PhoneNumber"]) {
+                    // Fallback kimi adi nömrəni götürək, amma WhatsApp linki üçün təmizləmək lazımdır
+                    setWhatsappNumber(res.data["PhoneNumber"]);
+                }
+            })
+            .catch(err => console.error("Settings error:", err));
+    });
 
     // Modal Stateləri
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -183,6 +200,33 @@ export default function BookingForm({ houseId, price, existingBookings }: Bookin
             <p className="text-center text-xs text-gray-400 mt-3">
                 Sizdən hələlik heç bir ödəniş tutulmur.
             </p>
+
+            {/* --- WHATSAPP BUTONU --- */}
+            {/* --- WHATSAPP BUTONU --- */}
+            {whatsappNumber && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                    <button
+                        onClick={() => {
+                            if (!startDate || !endDate) {
+                                toast.error("Zəhmət olmasa, əvvəlcə giriş və çıxış tarixlərini seçin.");
+                                return;
+                            }
+                            const text = `Salam, "${houseTitle}" evi üçün ${format(startDate, "dd.MM.yyyy")} - ${format(endDate, "dd.MM.yyyy")} tarixlərinə rezervasiya etmək istəyirəm. Ümumi qiymət: ${total} ₼.`;
+                            const url = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(text)}`;
+                            window.open(url, "_blank");
+                        }}
+                        className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2 transition-colors cursor-pointer"
+                    >
+                        <FaWhatsapp className="text-2xl" />
+                        WhatsApp ilə Rezervasiya
+                    </button>
+                    <p className="text-center text-xs text-gray-400 mt-2">
+                        {startDate && endDate
+                            ? "Seçdiyiniz tarixlər və qiymət mesaja əlavə olunacaq"
+                            : "Rezervasiya üçün tarixləri seçmək mütləqdir"}
+                    </p>
+                </div>
+            )}
 
             {/* AuthModal */}
             <AuthModal

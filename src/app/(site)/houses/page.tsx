@@ -278,7 +278,7 @@ function HousesContent() {
                     {/* --- SAĞ TƏRƏF: EVLƏR --- */}
                     <div className="w-full lg:w-3/4">
                         <div className="mb-6 flex justify-between items-center">
-                            
+                    
 
                             {/* Küçük bir bilgilendirme (Mobil için faydalı olabilir) */}
                             {filteredHouses.length === 0 && (
