@@ -95,7 +95,7 @@ export default function ToursPage() {
     };
 
     return (
-        <main className="min-h-screen bg-gray-50 pb-20">
+        <main className="min-h-screen bg-white dark:bg-black pb-20 transition-colors duration-300">
             {/* --- BAŞLIQ (Evlərimiz səhifəsi ilə eyni sadəlikdə) --- */}
             <div className="bg-gray-900 text-white py-20">
                 <div className="container mx-auto px-4 text-center">
@@ -113,22 +113,22 @@ export default function ToursPage() {
 
                     {/* --- SIDEBAR FİLTRE (SOL) --- */}
                     <aside className="w-full lg:w-1/4">
-                        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 sticky top-24">
-                            <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+                        <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-zinc-800 sticky top-24 transition-colors duration-300">
+                            <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-zinc-800 pb-4">
                                 <FunnelIcon className="w-5 h-5 text-primary" />
-                                <h3 className="font-bold text-gray-900 text-lg">Filtrlər</h3>
+                                <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg">Filtrlər</h3>
                             </div>
 
                             {/* Axtarış Inputu */}
                             <div className="mb-6">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Axtarış</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Axtarış</label>
                                 <div className="relative">
                                     <input
                                         type="text"
                                         placeholder="Tur adı və ya şəhər..."
                                         value={tempSearchTerm}
                                         onChange={(e) => setTempSearchTerm(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition"
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                     />
                                     <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
                                 </div>
@@ -136,7 +136,7 @@ export default function ToursPage() {
 
                             {/* Qiymət Slideri (Evlərimizdəki kimi) */}
                             <div className="mb-8">
-                                <label className="block text-sm font-medium text-gray-700 mb-4">Qiymət Aralığı (AZN)</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Qiymət Aralığı (AZN)</label>
                                 <PriceRangeSlider
                                     min={0}
                                     max={1000}
@@ -149,13 +149,13 @@ export default function ToursPage() {
 
                             {/* Gün Sayısı (Hamısı Buttonu ilə) */}
                             <div className="mb-8">
-                                <label className="block text-sm font-medium text-gray-700 mb-3">Müddət (Gün)</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Müddət (Gün)</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <button
                                         onClick={() => setTempMinDays(null)}
                                         className={`py-2 text-sm font-medium rounded-lg transition-all ${tempMinDays === null
                                             ? "bg-primary text-white shadow-md"
-                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                            : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700"
                                             }`}
                                     >
                                         Hamısı
@@ -166,7 +166,7 @@ export default function ToursPage() {
                                             onClick={() => setTempMinDays(day)}
                                             className={`py-2 text-sm font-medium rounded-lg transition-all ${tempMinDays === day
                                                 ? "bg-primary text-white shadow-md"
-                                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700"
                                                 }`}
                                         >
                                             {day}+ Gün
@@ -199,10 +199,10 @@ export default function ToursPage() {
                     <div className="w-full lg:w-3/4">
                         {/* Nəticə Başlığı */}
                         <div className="mb-6 flex justify-between items-center">
-                            <h2 className="text-2xl font-bold text-gray-900">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                                 Səyahət Paketləri
                             </h2>
-                            <span className="text-sm bg-gray-100 text-gray-600 px-4 py-1.5 rounded-full font-medium">
+                            <span className="text-sm bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 px-4 py-1.5 rounded-full font-medium">
                                 {filteredTours.length} nəticə
                             </span>
                         </div>
@@ -211,19 +211,19 @@ export default function ToursPage() {
                         {loading && (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[1, 2, 3, 4, 5, 6].map((n) => (
-                                    <div key={n} className="bg-white rounded-2xl h-[380px] animate-pulse shadow-sm border border-gray-100" />
+                                    <div key={n} className="bg-white dark:bg-[#121212] rounded-2xl h-[380px] animate-pulse shadow-sm border border-gray-100 dark:border-zinc-800" />
                                 ))}
                             </div>
                         )}
 
                         {/* Nəticə Yoxdursa */}
                         {!loading && filteredTours.length === 0 && (
-                            <div className="bg-white rounded-2xl p-16 text-center border border-gray-100 shadow-sm">
-                                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div className="bg-white dark:bg-[#121212] rounded-2xl p-16 text-center border border-gray-100 dark:border-zinc-800 shadow-sm transition-colors duration-300">
+                                <div className="w-20 h-20 bg-gray-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <MagnifyingGlassIcon className="w-10 h-10 text-gray-400" />
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">Nəticə tapılmadı</h3>
-                                <p className="text-gray-500">
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Nəticə tapılmadı</h3>
+                                <p className="text-gray-500 max-w-sm mx-auto">
                                     Axtarışınıza uyğun tur mövcud deyil. Filtrləri dəyişərək yenidən cəhd edin.
                                 </p>
                             </div>

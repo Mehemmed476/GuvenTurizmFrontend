@@ -120,15 +120,15 @@ export default function HouseDetailClient({ id }: { id: string }) {
     if (!house) return <div className="py-40 text-center text-red-500">Ev tapılmadı.</div>;
 
     return (
-        <div className="min-h-screen bg-white pb-20">
+        <div className="min-h-screen bg-white dark:bg-black pb-20 transition-colors duration-300">
             <div className="container mx-auto px-4 pt-6">
 
                 {/* --- BAŞLIQ --- */}
                 <div className="mb-6">
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">
                         {house.title}
                     </h1>
-                    <p className="text-gray-500 underline flex items-center gap-1">
+                    <p className="text-gray-500 dark:text-gray-400 underline flex items-center gap-1">
                         <span>📍 {house.address || house.city}</span>
                     </p>
                 </div>
@@ -181,10 +181,10 @@ export default function HouseDetailClient({ id }: { id: string }) {
                     <div className="lg:col-span-2 space-y-10">
 
                         {/* İkonlar */}
-                        <div className="flex flex-wrap gap-6 pb-8 border-b border-gray-100">
+                        <div className="flex flex-wrap gap-6 pb-8 border-b border-gray-100 dark:border-gray-800">
                             <div className="flex items-center gap-3">
-                                <div className="p-3 bg-orange-50 rounded-xl text-primary">🛏️</div>
-                                <div><p className="font-bold text-gray-900">{house.numberOfRooms} Otaq</p></div>
+                                <div className="p-3 bg-orange-50 dark:bg-orange-500/10 rounded-xl text-primary">🛏️</div>
+                                <div><p className="font-bold text-gray-900 dark:text-gray-100">{house.numberOfRooms} Otaq</p></div>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="p-3 bg-orange-50 rounded-xl text-primary">💤</div>
@@ -198,8 +198,8 @@ export default function HouseDetailClient({ id }: { id: string }) {
 
                         {/* Təsvir */}
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Ev Haqqında</h2>
-                            <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-line">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Ev Haqqında</h2>
+                            <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-line">
                                 {house.description}
                             </p>
                         </div>
@@ -207,12 +207,12 @@ export default function HouseDetailClient({ id }: { id: string }) {
                         {/* Üstünlüklər */}
                         {house.houseHouseAdvantageRels && house.houseHouseAdvantageRels.length > 0 && (
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Nələr Təklif Edirik?</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Nələr Təklif Edirik?</h2>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     {house.houseHouseAdvantageRels.map((rel, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 p-4 border border-gray-100 rounded-xl bg-gray-50/50">
+                                        <div key={idx} className="flex items-center gap-3 p-4 border border-gray-100 dark:border-zinc-800 rounded-xl bg-white dark:bg-[#121212] shadow-sm">
                                             <span className="text-primary text-xl">✓</span>
-                                            <span className="text-gray-700 font-medium">{rel.houseAdvantage.title}</span>
+                                            <span className="text-gray-700 dark:text-gray-200 font-medium">{rel.houseAdvantage.title}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -222,9 +222,9 @@ export default function HouseDetailClient({ id }: { id: string }) {
                         {/* Xəritə */}
                         {house.googleMapsCode && (
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Ünvan</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Ünvan</h2>
                                 <div
-                                    className="h-[400px] w-full rounded-3xl overflow-hidden shadow-lg border border-gray-200 [&_iframe]:w-full [&_iframe]:h-full"
+                                    className="h-[400px] w-full rounded-3xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800 [&_iframe]:w-full [&_iframe]:h-full"
                                     dangerouslySetInnerHTML={{ __html: house.googleMapsCode }}
                                 />
                             </div>

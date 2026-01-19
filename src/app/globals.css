@@ -1,20 +1,56 @@
 @import "react-datepicker/dist/react-datepicker.css";
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  /* Kendi renklerimizi burada tanımlıyoruz */
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-background: var(--color-background);
+  --color-text-main: var(--color-text-main);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+}
+
+:root {
+  /* --- LIGHT MODE (ORIGINAL) --- */
   --color-primary: #FF5E14;
-  /* Senin ana Turuncu rengin */
-  --color-secondary: #FFFFFF;
-  /* Beyaz */
+
+  /* Must match original styling exactly */
   --color-background: #F3F4F6;
-  /* Arka plan grisi */
+  --color-surface: #FFFFFF;
+  --color-text-main: #333333;
+  --color-text-muted: #6B7280;
+  /* gray-500 equivalent */
+  --color-border: #E5E7EB;
+  /* gray-200 equivalent */
+}
+
+/* --- DARK MODE (DEEP & READABLE) --- */
+.dark {
+  --color-primary: #FF5E14;
+
+  /* Deep Blue/Gray for better eye comfort than pure black */
+  --color-background: #0B1120;
+  /* Darker than gray-900 */
+  --color-surface: #151F32;
+  /* Slightly lighter for cards */
+
+  /* High Contrast Text */
+  --color-text-main: #F9FAFB;
+  /* gray-50 */
+  --color-text-muted: #D1D5DB;
+  /* gray-300 */
+
+  --color-border: #1E293B;
+  /* slate-800 */
 }
 
 /* Sayfa geneli için temel ayarlar */
 body {
   background-color: var(--color-background);
-  color: #333333;
+  color: var(--color-text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* globals.css dosyasının en alt satırına ekle */

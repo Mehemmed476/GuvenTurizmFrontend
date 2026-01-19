@@ -125,20 +125,20 @@ export default function BookingForm({ houseId, price, existingBookings, houseTit
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sticky top-24">
+        <div className="bg-white dark:bg-[#121212] rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-800 p-6 sticky top-24 transition-colors duration-300">
 
             <div className="flex justify-between items-end mb-6">
                 <div>
-                    <span className="text-3xl font-bold text-gray-900">{price} ₼</span>
-                    <span className="text-gray-500"> / gecə</span>
+                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">{price} ₼</span>
+                    <span className="text-gray-500 dark:text-gray-400"> / gecə</span>
                 </div>
             </div>
 
-            <div className="border border-gray-200 rounded-xl mb-4 overflow-hidden">
-                <div className="flex border-b border-gray-200">
+            <div className="border border-gray-200 dark:border-zinc-800 rounded-xl mb-4 overflow-hidden">
+                <div className="flex border-b border-gray-200 dark:border-zinc-800">
                     {/* GİRİŞ TARİXİ */}
-                    <div className="w-1/2 p-3 border-r border-gray-200">
-                        <label className="block text-xs font-bold text-gray-500 uppercase">Giriş</label>
+                    <div className="w-1/2 p-3 border-r border-gray-200 dark:border-zinc-800">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Giriş</label>
                         <DatePicker
                             selected={startDate}
                             onChange={(date) => setStartDate(date)}
@@ -150,14 +150,14 @@ export default function BookingForm({ houseId, price, existingBookings, houseTit
                             locale={az}
                             dateFormat="dd MMMM yyyy"
                             placeholderText="Seçin"
-                            className="w-full outline-none text-gray-700 font-medium bg-transparent text-sm cursor-pointer"
+                            className="w-full outline-none text-gray-700 dark:text-gray-200 font-medium bg-transparent text-sm cursor-pointer"
                             onFocus={(e) => e.target.blur()}
                         />
                     </div>
 
                     {/* ÇIXIŞ TARİXİ */}
                     <div className="w-1/2 p-3">
-                        <label className="block text-xs font-bold text-gray-500 uppercase">Çıxış</label>
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Çıxış</label>
                         <DatePicker
                             selected={endDate}
                             onChange={(date) => setEndDate(date)}
@@ -169,7 +169,7 @@ export default function BookingForm({ houseId, price, existingBookings, houseTit
                             locale={az}
                             dateFormat="dd MMMM yyyy"
                             placeholderText="Seçin"
-                            className="w-full outline-none text-gray-700 font-medium bg-transparent text-sm cursor-pointer"
+                            className="w-full outline-none text-gray-700 dark:text-gray-200 font-medium bg-transparent text-sm cursor-pointer"
                             onFocus={(e) => e.target.blur()}
                         />
                     </div>
@@ -177,12 +177,12 @@ export default function BookingForm({ houseId, price, existingBookings, houseTit
             </div>
 
             {total > 0 && (
-                <div className="space-y-3 mb-6 text-gray-600 text-sm animate-fadeIn">
+                <div className="space-y-3 mb-6 text-gray-600 dark:text-gray-300 text-sm animate-fadeIn">
                     <div className="flex justify-between">
                         <span className="underline">{price} ₼ x {days} gecə</span>
                         <span>{total} ₼</span>
                     </div>
-                    <div className="border-t border-gray-100 pt-3 flex justify-between font-bold text-gray-900 text-lg">
+                    <div className="border-t border-gray-100 dark:border-gray-700 pt-3 flex justify-between font-bold text-gray-900 dark:text-gray-100 text-lg">
                         <span>Cəmi</span>
                         <span>{total} ₼</span>
                     </div>
@@ -204,7 +204,7 @@ export default function BookingForm({ houseId, price, existingBookings, houseTit
             {/* --- WHATSAPP BUTONU --- */}
             {/* --- WHATSAPP BUTONU --- */}
             {whatsappNumber && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                     <button
                         onClick={() => {
                             if (!startDate || !endDate) {

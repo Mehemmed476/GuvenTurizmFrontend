@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeProvider";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -82,7 +83,7 @@ export default function RootLayout({
     };
 
     return (
-        <html lang="az">
+        <html lang="az" suppressHydrationWarning>
             <body className={inter.className}>
                 <Script
                     id="schema-org"
@@ -91,31 +92,38 @@ export default function RootLayout({
                 />
 
                 <AuthProvider>
-                    {children}
-                    <Toaster
-                        position="top-center"
-                        reverseOrder={false}
-                        toastOptions={{
-                            duration: 4000,
-                            style: {
-                                background: '#FFFFFF',
-                                color: '#1F2937',
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                borderRadius: '12px',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                padding: '16px',
-                            },
-                            success: {
-                                iconTheme: { primary: '#FF8C00', secondary: 'white' },
-                                style: { borderLeft: '4px solid #FF8C00' }
-                            },
-                            error: {
-                                iconTheme: { primary: '#EF4444', secondary: 'white' },
-                                style: { borderLeft: '4px solid #EF4444' }
-                            },
-                        }}
-                    />
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        {children}
+                        <Toaster
+                            position="top-center"
+                            reverseOrder={false}
+                            toastOptions={{
+                                duration: 4000,
+                                style: {
+                                    background: '#FFFFFF',
+                                    color: '#1F2937',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    padding: '16px',
+                                },
+                                success: {
+                                    iconTheme: { primary: '#FF8C00', secondary: 'white' },
+                                    style: { borderLeft: '4px solid #FF8C00' }
+                                },
+                                error: {
+                                    iconTheme: { primary: '#EF4444', secondary: 'white' },
+                                    style: { borderLeft: '4px solid #EF4444' }
+                                },
+                            }}
+                        />
+                    </ThemeProvider>
                 </AuthProvider>
             </body>
         </html>

@@ -166,7 +166,7 @@ function HousesContent() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-white dark:bg-black pb-20 transition-colors duration-300">
             {/* BAŞLIQ */}
             <div className="bg-gray-900 py-12 mb-10 relative">
                 <div className="container mx-auto px-4 relative z-10 text-center">
@@ -182,21 +182,21 @@ function HousesContent() {
 
                     {/* --- SOL TƏRƏF: FİLTRLƏR --- */}
                     <aside className="w-full lg:w-1/4">
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
-                            <h3 className="text-xl font-bold text-gray-800 mb-6">Filtrlər</h3>
+                        <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 sticky top-24 transition-colors duration-300">
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">Filtrlər</h3>
 
                             {/* Kateqoriya */}
                             <div className="mb-6">
-                                <h4 className="font-semibold text-gray-700 mb-3">Ev Tipi</h4>
+                                <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">Ev Tipi</h4>
                                 <div className="space-y-2">
                                     <label className="flex items-center gap-3 cursor-pointer group">
                                         <input type="radio" name="category" value="Hamısı" checked={selectedCategory === "Hamısı"} onChange={(e) => setSelectedCategory(e.target.value)} className="w-5 h-5 text-primary border-gray-300 focus:ring-primary" />
-                                        <span className="text-gray-600 group-hover:text-primary transition-colors">Hamısı</span>
+                                        <span className="text-gray-600 dark:text-gray-300 group-hover:text-primary transition-colors">Hamısı</span>
                                     </label>
                                     {categories.map((cat) => (
                                         <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
                                             <input type="radio" name="category" value={cat.title} checked={selectedCategory === cat.title} onChange={(e) => setSelectedCategory(e.target.value)} className="w-5 h-5 text-primary border-gray-300 focus:ring-primary" />
-                                            <span className="text-gray-600 group-hover:text-primary transition-colors">{cat.title}</span>
+                                            <span className="text-gray-600 dark:text-gray-300 group-hover:text-primary transition-colors">{cat.title}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -204,22 +204,22 @@ function HousesContent() {
 
                             {/* Otaq Sayı */}
                             <div className="mb-8">
-                                <h4 className="font-semibold text-gray-700 mb-3">Otaq Sayı</h4>
+                                <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">Otaq Sayı</h4>
                                 <div className="flex flex-col gap-4">
                                     <button
                                         onClick={() => setMinRooms(1)}
                                         className={`w-full py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border ${minRooms === 1
-                                                ? "bg-primary text-white border-primary shadow-md"
-                                                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                                            ? "bg-primary text-white border-primary shadow-md"
+                                            : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                                             }`}
                                     >
                                         Hamısı
                                     </button>
 
                                     <div className={`transition-opacity duration-300 ${minRooms === 1 ? 'opacity-60 hover:opacity-100' : 'opacity-100'}`}>
-                                        <div className="flex justify-between mb-2 text-xs font-medium text-gray-500">
+                                        <div className="flex justify-between mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                                             <span>Min. Limit</span>
-                                            <span className="text-gray-900 font-bold">{minRooms} Otaq</span>
+                                            <span className="text-gray-900 dark:text-white font-bold">{minRooms} Otaq</span>
                                         </div>
                                         <input
                                             type="range"
@@ -240,7 +240,7 @@ function HousesContent() {
 
                             {/* Qiymət Aralığı */}
                             <div className="mb-8">
-                                <h4 className="font-semibold text-gray-700 mb-2">Qiymət Aralığı</h4>
+                                <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-2">Qiymət Aralığı</h4>
                                 <PriceRangeSlider
                                     min={0}
                                     max={2000}
@@ -278,7 +278,7 @@ function HousesContent() {
                     {/* --- SAĞ TƏRƏF: EVLƏR --- */}
                     <div className="w-full lg:w-3/4">
                         <div className="mb-6 flex justify-between items-center">
-                    
+
 
                             {/* Küçük bir bilgilendirme (Mobil için faydalı olabilir) */}
                             {filteredHouses.length === 0 && (
@@ -328,9 +328,9 @@ function HousesContent() {
                                 )}
                             </>
                         ) : (
-                            <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                            <div className="text-center py-20 bg-white dark:bg-[#121212] rounded-2xl border border-gray-100 dark:border-zinc-800">
                                 <div className="text-6xl mb-4">🏠❌</div>
-                                <h3 className="text-xl font-bold text-gray-800">Ev Tapılmadı</h3>
+                                <h3 className="text-xl font-bold text-gray-800 dark:text-white">Ev Tapılmadı</h3>
                                 <p className="text-gray-500 mt-2">Zəhmət olmasa filtrləri dəyişib "Axtar" düyməsinə basın.</p>
                             </div>
                         )}

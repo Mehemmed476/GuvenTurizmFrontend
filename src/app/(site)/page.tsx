@@ -5,7 +5,7 @@ import NewestTours from "@/components/NewestTours";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-white dark:bg-black transition-colors duration-300">
       <HeroSection />
 
       <FeaturedProperties />

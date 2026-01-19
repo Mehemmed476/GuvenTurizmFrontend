@@ -13,7 +13,7 @@ interface HouseProps {
 
 export default function PropertyCard({ id, title, address, price, roomCount, bedCount, imageUrl }: HouseProps) {
     return (
-        <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col h-full">
+        <div className="group bg-white dark:bg-[#121212] rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-zinc-800 overflow-hidden flex flex-col h-full">
 
             {/* --- ŞƏKİL HİSSƏSİ --- */}
             <div className="relative h-60 w-full overflow-hidden">
@@ -45,16 +45,16 @@ export default function PropertyCard({ id, title, address, price, roomCount, bed
                     {address}
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 mb-4 line-clamp-1 group-hover:text-primary transition-colors">
+                <h3 className="text-lg font-bold text-[#333333] dark:text-[#F3F4F6] mb-4 line-clamp-1 group-hover:text-primary transition-colors">
                     {title}
                 </h3>
 
-                <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
-                    <div className="flex items-center gap-2 text-gray-600 bg-gray-50 px-3 py-2 rounded-lg text-sm">
+                <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100 dark:border-zinc-800">
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-zinc-800 px-3 py-2 rounded-lg text-sm">
                         <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                         <span className="font-medium">{roomCount} Otaq</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600 bg-gray-50 px-3 py-2 rounded-lg text-sm">
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-zinc-800 px-3 py-2 rounded-lg text-sm">
                         <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         <span className="font-medium">{bedCount} Yataq</span>
                     </div>

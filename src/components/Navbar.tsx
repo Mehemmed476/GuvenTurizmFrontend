@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react"; // useEffect və jwtDecode sildik
 import AuthModal from "./AuthModal";
 import toast from "react-hot-toast";
-import { useAuth } from "@/context/AuthContext"; // <--- IMPORT ET
+import { useAuth } from "@/context/AuthContext";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default function Navbar() {
     const { user, logout } = useAuth(); // <--- Context-dən məlumatları alırıq
@@ -17,7 +18,7 @@ export default function Navbar() {
     const isActive = (path: string) =>
         pathname === path
             ? "text-primary font-bold"
-            : "text-gray-600 hover:text-primary font-medium";
+            : "text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary font-medium";
 
     // --- LOGOUT (Artıq Context-dən gəlir) ---
     const handleLogoutClick = () => {
@@ -59,14 +60,14 @@ export default function Navbar() {
 
     return (
         <>
-            <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100 transition-all duration-300">
+            <header className="bg-white/95 dark:bg-black/95 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100 dark:border-zinc-800 transition-colors duration-300">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex justify-between items-center">
 
                         {/* LOGO */}
                         <Link href="/" className="text-2xl font-extrabold tracking-tight flex items-center gap-1 group">
                             <span className="text-primary group-hover:opacity-80 transition-opacity">Güvən</span>
-                            <span className="text-gray-800">Turizm</span>
+                            <span className="text-[#333333] dark:text-white">Turizm</span>
                         </Link>
 
                         {/* MASAÜSTÜ MENÜ */}
@@ -79,6 +80,7 @@ export default function Navbar() {
 
                         {/* --- SAĞ TƏRƏF --- */}
                         <div className="hidden md:flex items-center space-x-4">
+                            <ThemeToggle />
 
                             {user ? ( // user obyekti varsa deməli giriş edilib
                                 <div className="flex items-center gap-3">
@@ -136,23 +138,27 @@ export default function Navbar() {
 
                         </div>
 
-                        {/* MOBİL MENÜ BUTONU */}
-                        <button
-                            className="md:hidden text-gray-700 focus:outline-none p-2 rounded-md hover:bg-gray-100 transition"
-                            onClick={() => setIsOpen(!isOpen)}
-                        >
-                            {isOpen ? (
-                                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                            ) : (
-                                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                            )}
-                        </button>
+                        {/* MOBİL MENÜ BUTONU VE THEME TOGGLE */}
+                        <div className="flex items-center gap-2 md:hidden">
+                            <ThemeToggle />
+                            <button
+                                className="text-[#333333] dark:text-[#F3F4F6] focus:outline-none p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                                onClick={() => setIsOpen(!isOpen)}
+                            >
+                                {isOpen ? (
+                                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                ) : (
+                                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                )}
+                            </button>
+                        </div>
                     </div>
 
                     {/* MOBİL MENÜ İÇERİĞİ */}
                     {isOpen && (
                         <div className="md:hidden mt-4 pb-4 border-t border-gray-100 animate-fadeIn">
                             <div className="flex flex-col space-y-3 mt-4">
+
                                 <Link href="/" className={`block px-4 py-2 rounded-lg ${isActive("/")}`} onClick={() => setIsOpen(false)}>Əsas Səhifə</Link>
                                 <Link href="/houses" className={`block px-4 py-2 rounded-lg ${isActive("/houses")}`} onClick={() => setIsOpen(false)}>Evlərimiz</Link>
                                 <Link href="/tours" className={`block px-4 py-2 rounded-lg ${isActive("/tours")}`} onClick={() => setIsOpen(false)}>Turlar</Link>

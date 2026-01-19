@@ -55,22 +55,21 @@ export default function NewestTours() {
     if (tours.length === 0) return null;
 
     return (
-        <section className="py-20 bg-blue-50/50"> {/* Arxa fonu bir az fərqli etdik */}
+        <section className="py-20 bg-blue-50/50 dark:bg-[#121212] transition-colors duration-300"> {/* Arxa fonu bir az fərqli etdik */}
             <div className="container mx-auto px-4">
-
                 {/* Başlıq */}
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
                     <div className="text-center md:text-left w-full md:w-auto">
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
                             Yeni <span className="text-blue-600">Turlarımız</span>
                         </h2>
-                        <p className="text-gray-500 text-lg">
+                        <p className="text-gray-500 dark:text-gray-400 text-lg">
                             Sizin üçün hazırladığımız ən son səyahət paketləri.
                         </p>
                     </div>
 
                     {/* Masaüstü üçün Link */}
-                    <Link href="/tours" className="hidden md:inline-flex items-center text-blue-600 font-bold hover:text-blue-700 transition">
+                    <Link href="/tours" className="hidden md:inline-flex items-center text-blue-600 dark:text-blue-400 font-bold hover:text-blue-700 dark:hover:text-blue-300 transition">
                         Bütün Turlara Bax <span className="ml-2 text-xl">→</span>
                     </Link>
                 </div>

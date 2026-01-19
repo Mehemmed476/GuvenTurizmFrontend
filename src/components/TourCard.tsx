@@ -14,7 +14,7 @@ interface TourProps {
 
 export default function TourCard({ id, title, location, price, durationDay, durationNight, imageUrl }: TourProps) {
     return (
-        <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col h-full">
+        <div className="group bg-white dark:bg-[#121212] rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-zinc-800 overflow-hidden flex flex-col h-full">
 
             {/* --- ŞƏKİL HİSSƏSİ --- */}
             <div className="relative h-60 w-full overflow-hidden">
@@ -27,7 +27,7 @@ export default function TourCard({ id, title, location, price, durationDay, dura
                 />
 
                 {/* Sol Üst Etiket - Lokasiya */}
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-gray-800 shadow-sm flex items-center gap-1 z-10">
+                <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-gray-800 dark:text-gray-200 shadow-sm flex items-center gap-1 z-10">
                     📍 {location}
                 </div>
 
@@ -46,7 +46,7 @@ export default function TourCard({ id, title, location, price, durationDay, dura
                 </div>
 
                 {/* Başlıq */}
-                <h3 className="text-lg font-bold text-gray-900 mb-4 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                <h3 className="text-lg font-bold text-[#333333] dark:text-[#F3F4F6] mb-4 line-clamp-1 group-hover:text-blue-600 transition-colors">
                     {title}
                 </h3>
 

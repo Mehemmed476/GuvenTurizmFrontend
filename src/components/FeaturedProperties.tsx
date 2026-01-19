@@ -54,12 +54,12 @@ export default function FeaturedProperties() {
     // --- LOADING SKELETON ---
     if (loading) {
         return (
-            <section className="py-20 bg-white">
+            <section className="py-20 bg-white dark:bg-black transition-colors duration-300">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-12">
                         {/* Başlıq Skeleti */}
-                        <div className="h-10 w-64 bg-gray-100 rounded-lg mx-auto animate-pulse mb-4"></div>
-                        <div className="h-4 w-96 bg-gray-50 rounded-lg mx-auto animate-pulse"></div>
+                        <div className="h-10 w-64 bg-gray-100 dark:bg-zinc-800 rounded-lg mx-auto animate-pulse mb-4"></div>
+                        <div className="h-4 w-96 bg-gray-50 dark:bg-zinc-800/50 rounded-lg mx-auto animate-pulse"></div>
                     </div>
                     {/* Kart Skeletləri (3 ədəd) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -77,15 +77,15 @@ export default function FeaturedProperties() {
     }
 
     return (
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-white dark:bg-black transition-colors duration-300">
             <div className="container mx-auto px-4">
 
                 {/* Bölmə Başlığı */}
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
                         Ən Çox Bəyənilən <span className="text-primary">Evlərimiz</span>
                     </h2>
-                    <p className="text-gray-500 max-w-2xl mx-auto text-lg">
+                    <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-lg">
                         Qonaqlarımız tərəfindən ən yüksək qiymət alan və tövsiyə edilən istirahət məkanları.
                     </p>
                 </div>
@@ -110,7 +110,7 @@ export default function FeaturedProperties() {
                 <div className="text-center mt-12">
                     <Link
                         href="/houses"
-                        className="inline-block px-8 py-3 border-2 border-gray-900 text-gray-900 font-bold rounded-full hover:bg-gray-900 hover:text-white transition-all"
+                        className="inline-block px-8 py-3 border-2 border-gray-900 dark:border-white text-gray-900 dark:text-white font-bold rounded-full hover:bg-gray-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all"
                     >
                         Bütün Evlərə Bax →
                     </Link>
