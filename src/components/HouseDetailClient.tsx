@@ -5,7 +5,6 @@ import Image from "next/image";
 import BookingForm from "@/components/BookingForm";
 import api from "@/services/api";
 import ReviewSection from "@/components/ReviewSection"; // <--- Yeni komponent
-import Skeleton from "@/components/Skeleton"; // Əgər varsa
 
 // --- DTO TİPLƏRİ ---
 interface HouseAdvantageRel {
@@ -49,6 +48,26 @@ export default function HouseDetailClient({ id }: { id: string }) {
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+    // Qalereya açıq olanda səhifənin arxa hissəsinin scroll-unu bağla.
+    // Komponent səhifədən geri keçidlə silinsə belə əvvəlki dəyəri mütləq bərpa et.
+    useEffect(() => {
+        if (!isGalleryOpen) return;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setIsGalleryOpen(false);
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isGalleryOpen]);
+
     // --- API-DƏN MƏLUMATI ÇƏK ---
     useEffect(() => {
         const fetchHouse = async () => {
@@ -83,12 +102,10 @@ export default function HouseDetailClient({ id }: { id: string }) {
     const openGallery = (index: number) => {
         setCurrentImageIndex(index);
         setIsGalleryOpen(true);
-        document.body.style.overflow = 'hidden';
     };
 
     const closeGallery = () => {
         setIsGalleryOpen(false);
-        document.body.style.overflow = 'unset';
     };
 
     const nextImage = (e: React.MouseEvent) => {
